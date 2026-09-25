@@ -1,0 +1,13 @@
+{
+  "_comment": "Gauge universe + estimated next-epoch bribe deposits per adapter, in MUSD-equivalent 1e18. Copy to gauges.config.json and fill in real gauge/pool addresses + bribe estimates once confirmed with the Mezo team (docs/THAW_SYSTEM_DESIGN.md §22 open question #1). existingVotes is each gauge's current total voting power (also 1e18-scaled) so the optimizer can compute incentive-per-vote before adding Thaw's own weight.",
+  "adapters": {
+    "0x0000000000000000000000000000000000000000": {
+      "ourVotingPower": "50000000000000000000",
+      "gauges": [
+        { "gauge": "0x0000000000000000000000000000000000000001", "bribePoolUsd": "500000000000000000000", "existingVotes": "2000000000000000000000" },
+        { "gauge": "0x0000000000000000000000000000000000000002", "bribePoolUsd": "300000000000000000000", "existingVotes": "500000000000000000000" },
+        { "gauge": "0x0000000000000000000000000000000000000003", "bribePoolUsd": "120000000000000000000", "existingVotes": "1500000000000000000000" }
+      ]
+    }
+  }
+}
