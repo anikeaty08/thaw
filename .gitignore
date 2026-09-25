@@ -2,7 +2,12 @@
 node_modules/
 .env
 .env.*
+!.env.example
 out/
 cache/
 broadcast/
 .next/
+dist/
+data/
+*.tsbuildinfo
+.ponder/

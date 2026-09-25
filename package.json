@@ -1,0 +1,17 @@
+{
+  "name": "thaw",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Self-repaying MUSD credit for locked Mezo positions.",
+  "workspaces": [
+    "indexer",
+    "services/keeper",
+    "services/optimizer",
+    "apps/bot"
+  ],
+  "scripts": {
+    "contracts:build": "cd contracts && forge build",
+    "contracts:test": "cd contracts && forge test",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  }
+}

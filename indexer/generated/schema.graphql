@@ -1,0 +1,636 @@
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
+scalar BigInt
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+type Meta {
+  status: JSON
+}
+
+type Query {
+  loan(id: BigInt!): loan
+  loans(where: loanFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): loanPage!
+  harvestEvent(id: String!): harvestEvent
+  harvestEvents(where: harvestEventFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): harvestEventPage!
+  voteEvent(id: String!): voteEvent
+  voteEvents(where: voteEventFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): voteEventPage!
+  vaultFlow(id: String!): vaultFlow
+  vaultFlows(where: vaultFlowFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): vaultFlowPage!
+  auction(id: BigInt!): auction
+  auctions(where: auctionFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): auctionPage!
+  strategyPost(id: String!): strategyPost
+  strategyPosts(where: strategyPostFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): strategyPostPage!
+  _meta: Meta
+}
+
+type loan {
+  id: BigInt!
+  adapter: String!
+  tokenId: BigInt!
+  mode: String!
+  borrower: String!
+  principal: BigInt!
+  repayShareBps: Int!
+  aprBps: Int!
+  openedAt: BigInt!
+  closed: Boolean!
+  liquidating: Boolean!
+  missedEpochs: Int!
+  totalHarvested: BigInt!
+  totalRepaid: BigInt!
+  lastHarvestEpoch: BigInt
+  harvests(where: harvestEventFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): harvestEventPage
+  votes(where: voteEventFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): voteEventPage
+}
+
+type harvestEventPage {
+  items: [harvestEvent!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type harvestEvent {
+  id: String!
+  loanId: BigInt!
+  epoch: BigInt!
+  musdIn: BigInt!
+  toDebt: BigInt!
+  fee: BigInt!
+  surplus: BigInt!
+  bounty: BigInt!
+  keeper: String
+  timestamp: BigInt!
+  txHash: String!
+  loan: loan
+}
+
+input harvestEventFilter {
+  AND: [harvestEventFilter]
+  OR: [harvestEventFilter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  loanId: BigInt
+  loanId_not: BigInt
+  loanId_in: [BigInt]
+  loanId_not_in: [BigInt]
+  loanId_gt: BigInt
+  loanId_lt: BigInt
+  loanId_gte: BigInt
+  loanId_lte: BigInt
+  epoch: BigInt
+  epoch_not: BigInt
+  epoch_in: [BigInt]
+  epoch_not_in: [BigInt]
+  epoch_gt: BigInt
+  epoch_lt: BigInt
+  epoch_gte: BigInt
+  epoch_lte: BigInt
+  musdIn: BigInt
+  musdIn_not: BigInt
+  musdIn_in: [BigInt]
+  musdIn_not_in: [BigInt]
+  musdIn_gt: BigInt
+  musdIn_lt: BigInt
+  musdIn_gte: BigInt
+  musdIn_lte: BigInt
+  toDebt: BigInt
+  toDebt_not: BigInt
+  toDebt_in: [BigInt]
+  toDebt_not_in: [BigInt]
+  toDebt_gt: BigInt
+  toDebt_lt: BigInt
+  toDebt_gte: BigInt
+  toDebt_lte: BigInt
+  fee: BigInt
+  fee_not: BigInt
+  fee_in: [BigInt]
+  fee_not_in: [BigInt]
+  fee_gt: BigInt
+  fee_lt: BigInt
+  fee_gte: BigInt
+  fee_lte: BigInt
+  surplus: BigInt
+  surplus_not: BigInt
+  surplus_in: [BigInt]
+  surplus_not_in: [BigInt]
+  surplus_gt: BigInt
+  surplus_lt: BigInt
+  surplus_gte: BigInt
+  surplus_lte: BigInt
+  bounty: BigInt
+  bounty_not: BigInt
+  bounty_in: [BigInt]
+  bounty_not_in: [BigInt]
+  bounty_gt: BigInt
+  bounty_lt: BigInt
+  bounty_gte: BigInt
+  bounty_lte: BigInt
+  keeper: String
+  keeper_not: String
+  keeper_in: [String]
+  keeper_not_in: [String]
+  keeper_contains: String
+  keeper_not_contains: String
+  keeper_starts_with: String
+  keeper_ends_with: String
+  keeper_not_starts_with: String
+  keeper_not_ends_with: String
+  timestamp: BigInt
+  timestamp_not: BigInt
+  timestamp_in: [BigInt]
+  timestamp_not_in: [BigInt]
+  timestamp_gt: BigInt
+  timestamp_lt: BigInt
+  timestamp_gte: BigInt
+  timestamp_lte: BigInt
+  txHash: String
+  txHash_not: String
+  txHash_in: [String]
+  txHash_not_in: [String]
+  txHash_contains: String
+  txHash_not_contains: String
+  txHash_starts_with: String
+  txHash_ends_with: String
+  txHash_not_starts_with: String
+  txHash_not_ends_with: String
+}
+
+type voteEventPage {
+  items: [voteEvent!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type voteEvent {
+  id: String!
+  loanId: BigInt!
+  epoch: BigInt!
+  timestamp: BigInt!
+  loan: loan
+}
+
+input voteEventFilter {
+  AND: [voteEventFilter]
+  OR: [voteEventFilter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  loanId: BigInt
+  loanId_not: BigInt
+  loanId_in: [BigInt]
+  loanId_not_in: [BigInt]
+  loanId_gt: BigInt
+  loanId_lt: BigInt
+  loanId_gte: BigInt
+  loanId_lte: BigInt
+  epoch: BigInt
+  epoch_not: BigInt
+  epoch_in: [BigInt]
+  epoch_not_in: [BigInt]
+  epoch_gt: BigInt
+  epoch_lt: BigInt
+  epoch_gte: BigInt
+  epoch_lte: BigInt
+  timestamp: BigInt
+  timestamp_not: BigInt
+  timestamp_in: [BigInt]
+  timestamp_not_in: [BigInt]
+  timestamp_gt: BigInt
+  timestamp_lt: BigInt
+  timestamp_gte: BigInt
+  timestamp_lte: BigInt
+}
+
+type loanPage {
+  items: [loan!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input loanFilter {
+  AND: [loanFilter]
+  OR: [loanFilter]
+  id: BigInt
+  id_not: BigInt
+  id_in: [BigInt]
+  id_not_in: [BigInt]
+  id_gt: BigInt
+  id_lt: BigInt
+  id_gte: BigInt
+  id_lte: BigInt
+  adapter: String
+  adapter_not: String
+  adapter_in: [String]
+  adapter_not_in: [String]
+  adapter_contains: String
+  adapter_not_contains: String
+  adapter_starts_with: String
+  adapter_ends_with: String
+  adapter_not_starts_with: String
+  adapter_not_ends_with: String
+  tokenId: BigInt
+  tokenId_not: BigInt
+  tokenId_in: [BigInt]
+  tokenId_not_in: [BigInt]
+  tokenId_gt: BigInt
+  tokenId_lt: BigInt
+  tokenId_gte: BigInt
+  tokenId_lte: BigInt
+  mode: String
+  mode_not: String
+  mode_in: [String]
+  mode_not_in: [String]
+  mode_contains: String
+  mode_not_contains: String
+  mode_starts_with: String
+  mode_ends_with: String
+  mode_not_starts_with: String
+  mode_not_ends_with: String
+  borrower: String
+  borrower_not: String
+  borrower_in: [String]
+  borrower_not_in: [String]
+  borrower_contains: String
+  borrower_not_contains: String
+  borrower_starts_with: String
+  borrower_ends_with: String
+  borrower_not_starts_with: String
+  borrower_not_ends_with: String
+  principal: BigInt
+  principal_not: BigInt
+  principal_in: [BigInt]
+  principal_not_in: [BigInt]
+  principal_gt: BigInt
+  principal_lt: BigInt
+  principal_gte: BigInt
+  principal_lte: BigInt
+  repayShareBps: Int
+  repayShareBps_not: Int
+  repayShareBps_in: [Int]
+  repayShareBps_not_in: [Int]
+  repayShareBps_gt: Int
+  repayShareBps_lt: Int
+  repayShareBps_gte: Int
+  repayShareBps_lte: Int
+  aprBps: Int
+  aprBps_not: Int
+  aprBps_in: [Int]
+  aprBps_not_in: [Int]
+  aprBps_gt: Int
+  aprBps_lt: Int
+  aprBps_gte: Int
+  aprBps_lte: Int
+  openedAt: BigInt
+  openedAt_not: BigInt
+  openedAt_in: [BigInt]
+  openedAt_not_in: [BigInt]
+  openedAt_gt: BigInt
+  openedAt_lt: BigInt
+  openedAt_gte: BigInt
+  openedAt_lte: BigInt
+  closed: Boolean
+  closed_not: Boolean
+  closed_in: [Boolean]
+  closed_not_in: [Boolean]
+  liquidating: Boolean
+  liquidating_not: Boolean
+  liquidating_in: [Boolean]
+  liquidating_not_in: [Boolean]
+  missedEpochs: Int
+  missedEpochs_not: Int
+  missedEpochs_in: [Int]
+  missedEpochs_not_in: [Int]
+  missedEpochs_gt: Int
+  missedEpochs_lt: Int
+  missedEpochs_gte: Int
+  missedEpochs_lte: Int
+  totalHarvested: BigInt
+  totalHarvested_not: BigInt
+  totalHarvested_in: [BigInt]
+  totalHarvested_not_in: [BigInt]
+  totalHarvested_gt: BigInt
+  totalHarvested_lt: BigInt
+  totalHarvested_gte: BigInt
+  totalHarvested_lte: BigInt
+  totalRepaid: BigInt
+  totalRepaid_not: BigInt
+  totalRepaid_in: [BigInt]
+  totalRepaid_not_in: [BigInt]
+  totalRepaid_gt: BigInt
+  totalRepaid_lt: BigInt
+  totalRepaid_gte: BigInt
+  totalRepaid_lte: BigInt
+  lastHarvestEpoch: BigInt
+  lastHarvestEpoch_not: BigInt
+  lastHarvestEpoch_in: [BigInt]
+  lastHarvestEpoch_not_in: [BigInt]
+  lastHarvestEpoch_gt: BigInt
+  lastHarvestEpoch_lt: BigInt
+  lastHarvestEpoch_gte: BigInt
+  lastHarvestEpoch_lte: BigInt
+}
+
+type vaultFlow {
+  id: String!
+  kind: String!
+  amount: BigInt!
+  counterparty: String
+  timestamp: BigInt!
+  txHash: String!
+}
+
+type vaultFlowPage {
+  items: [vaultFlow!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input vaultFlowFilter {
+  AND: [vaultFlowFilter]
+  OR: [vaultFlowFilter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  kind: String
+  kind_not: String
+  kind_in: [String]
+  kind_not_in: [String]
+  kind_contains: String
+  kind_not_contains: String
+  kind_starts_with: String
+  kind_ends_with: String
+  kind_not_starts_with: String
+  kind_not_ends_with: String
+  amount: BigInt
+  amount_not: BigInt
+  amount_in: [BigInt]
+  amount_not_in: [BigInt]
+  amount_gt: BigInt
+  amount_lt: BigInt
+  amount_gte: BigInt
+  amount_lte: BigInt
+  counterparty: String
+  counterparty_not: String
+  counterparty_in: [String]
+  counterparty_not_in: [String]
+  counterparty_contains: String
+  counterparty_not_contains: String
+  counterparty_starts_with: String
+  counterparty_ends_with: String
+  counterparty_not_starts_with: String
+  counterparty_not_ends_with: String
+  timestamp: BigInt
+  timestamp_not: BigInt
+  timestamp_in: [BigInt]
+  timestamp_not_in: [BigInt]
+  timestamp_gt: BigInt
+  timestamp_lt: BigInt
+  timestamp_gte: BigInt
+  timestamp_lte: BigInt
+  txHash: String
+  txHash_not: String
+  txHash_in: [String]
+  txHash_not_in: [String]
+  txHash_contains: String
+  txHash_not_contains: String
+  txHash_starts_with: String
+  txHash_ends_with: String
+  txHash_not_starts_with: String
+  txHash_not_ends_with: String
+}
+
+type auction {
+  id: BigInt!
+  adapter: String!
+  tokenId: BigInt!
+  startPrice: BigInt!
+  floorPrice: BigInt!
+  startedAt: BigInt!
+  settled: Boolean!
+  buyer: String
+  clearingPrice: BigInt
+  debtPortion: BigInt
+  penalty: BigInt
+  borrowerAmount: BigInt
+  badDebt: BigInt
+  settledAt: BigInt
+}
+
+type auctionPage {
+  items: [auction!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input auctionFilter {
+  AND: [auctionFilter]
+  OR: [auctionFilter]
+  id: BigInt
+  id_not: BigInt
+  id_in: [BigInt]
+  id_not_in: [BigInt]
+  id_gt: BigInt
+  id_lt: BigInt
+  id_gte: BigInt
+  id_lte: BigInt
+  adapter: String
+  adapter_not: String
+  adapter_in: [String]
+  adapter_not_in: [String]
+  adapter_contains: String
+  adapter_not_contains: String
+  adapter_starts_with: String
+  adapter_ends_with: String
+  adapter_not_starts_with: String
+  adapter_not_ends_with: String
+  tokenId: BigInt
+  tokenId_not: BigInt
+  tokenId_in: [BigInt]
+  tokenId_not_in: [BigInt]
+  tokenId_gt: BigInt
+  tokenId_lt: BigInt
+  tokenId_gte: BigInt
+  tokenId_lte: BigInt
+  startPrice: BigInt
+  startPrice_not: BigInt
+  startPrice_in: [BigInt]
+  startPrice_not_in: [BigInt]
+  startPrice_gt: BigInt
+  startPrice_lt: BigInt
+  startPrice_gte: BigInt
+  startPrice_lte: BigInt
+  floorPrice: BigInt
+  floorPrice_not: BigInt
+  floorPrice_in: [BigInt]
+  floorPrice_not_in: [BigInt]
+  floorPrice_gt: BigInt
+  floorPrice_lt: BigInt
+  floorPrice_gte: BigInt
+  floorPrice_lte: BigInt
+  startedAt: BigInt
+  startedAt_not: BigInt
+  startedAt_in: [BigInt]
+  startedAt_not_in: [BigInt]
+  startedAt_gt: BigInt
+  startedAt_lt: BigInt
+  startedAt_gte: BigInt
+  startedAt_lte: BigInt
+  settled: Boolean
+  settled_not: Boolean
+  settled_in: [Boolean]
+  settled_not_in: [Boolean]
+  buyer: String
+  buyer_not: String
+  buyer_in: [String]
+  buyer_not_in: [String]
+  buyer_contains: String
+  buyer_not_contains: String
+  buyer_starts_with: String
+  buyer_ends_with: String
+  buyer_not_starts_with: String
+  buyer_not_ends_with: String
+  clearingPrice: BigInt
+  clearingPrice_not: BigInt
+  clearingPrice_in: [BigInt]
+  clearingPrice_not_in: [BigInt]
+  clearingPrice_gt: BigInt
+  clearingPrice_lt: BigInt
+  clearingPrice_gte: BigInt
+  clearingPrice_lte: BigInt
+  debtPortion: BigInt
+  debtPortion_not: BigInt
+  debtPortion_in: [BigInt]
+  debtPortion_not_in: [BigInt]
+  debtPortion_gt: BigInt
+  debtPortion_lt: BigInt
+  debtPortion_gte: BigInt
+  debtPortion_lte: BigInt
+  penalty: BigInt
+  penalty_not: BigInt
+  penalty_in: [BigInt]
+  penalty_not_in: [BigInt]
+  penalty_gt: BigInt
+  penalty_lt: BigInt
+  penalty_gte: BigInt
+  penalty_lte: BigInt
+  borrowerAmount: BigInt
+  borrowerAmount_not: BigInt
+  borrowerAmount_in: [BigInt]
+  borrowerAmount_not_in: [BigInt]
+  borrowerAmount_gt: BigInt
+  borrowerAmount_lt: BigInt
+  borrowerAmount_gte: BigInt
+  borrowerAmount_lte: BigInt
+  badDebt: BigInt
+  badDebt_not: BigInt
+  badDebt_in: [BigInt]
+  badDebt_not_in: [BigInt]
+  badDebt_gt: BigInt
+  badDebt_lt: BigInt
+  badDebt_gte: BigInt
+  badDebt_lte: BigInt
+  settledAt: BigInt
+  settledAt_not: BigInt
+  settledAt_in: [BigInt]
+  settledAt_not_in: [BigInt]
+  settledAt_gt: BigInt
+  settledAt_lt: BigInt
+  settledAt_gte: BigInt
+  settledAt_lte: BigInt
+}
+
+type strategyPost {
+  id: String!
+  adapter: String!
+  epoch: BigInt!
+  strategyHash: String!
+  timestamp: BigInt!
+}
+
+type strategyPostPage {
+  items: [strategyPost!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input strategyPostFilter {
+  AND: [strategyPostFilter]
+  OR: [strategyPostFilter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  adapter: String
+  adapter_not: String
+  adapter_in: [String]
+  adapter_not_in: [String]
+  adapter_contains: String
+  adapter_not_contains: String
+  adapter_starts_with: String
+  adapter_ends_with: String
+  adapter_not_starts_with: String
+  adapter_not_ends_with: String
+  epoch: BigInt
+  epoch_not: BigInt
+  epoch_in: [BigInt]
+  epoch_not_in: [BigInt]
+  epoch_gt: BigInt
+  epoch_lt: BigInt
+  epoch_gte: BigInt
+  epoch_lte: BigInt
+  strategyHash: String
+  strategyHash_not: String
+  strategyHash_in: [String]
+  strategyHash_not_in: [String]
+  strategyHash_contains: String
+  strategyHash_not_contains: String
+  strategyHash_starts_with: String
+  strategyHash_ends_with: String
+  strategyHash_not_starts_with: String
+  strategyHash_not_ends_with: String
+  timestamp: BigInt
+  timestamp_not: BigInt
+  timestamp_in: [BigInt]
+  timestamp_not_in: [BigInt]
+  timestamp_gt: BigInt
+  timestamp_lt: BigInt
+  timestamp_gte: BigInt
+  timestamp_lte: BigInt
+}
