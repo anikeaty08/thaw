@@ -1,0 +1,100 @@
+{
+  "version": 2,
+  "icons": {
+    "pack": "fluent-systems-regular",
+    "sizes": [
+      14,
+      16,
+      18,
+      20,
+      24
+    ],
+    "color": "currentColor",
+    "items": {
+      "wallet": {
+        "id": "drmCLEwhFUo3",
+        "commonName": "wallet"
+      },
+      "coins": {
+        "id": "c6JA9p8Nnzkq",
+        "commonName": "coins"
+      },
+      "gavel": {
+        "id": "aZmDiefeBpcF",
+        "commonName": "law"
+      },
+      "eye": {
+        "id": "4y6r43dyjbzw",
+        "commonName": "visible"
+      },
+      "drop": {
+        "id": "fcF1THrGgtl4",
+        "commonName": "water"
+      },
+      "thaw": {
+        "id": "WwZuO6QJXmcl",
+        "commonName": "defrosting"
+      },
+      "snowflake": {
+        "id": "QvyUEoUfyEFN",
+        "commonName": "snowflake"
+      },
+      "shield": {
+        "id": "vy6OvJYHSJ8I",
+        "commonName": "shield"
+      },
+      "close": {
+        "id": "1NVn5K29mOSz",
+        "commonName": "delete-sign"
+      },
+      "check": {
+        "id": "VfY8rwjNJSAQ",
+        "commonName": "checkmark"
+      },
+      "info": {
+        "id": "lzICmAiUWSkI",
+        "commonName": "info"
+      },
+      "warning": {
+        "id": "sWOXMMdMXpBD",
+        "commonName": "error"
+      },
+      "external": {
+        "id": "hUqP035cA2Bd",
+        "commonName": "external-link"
+      },
+      "clock": {
+        "id": "6Z5IUAh18Fuc",
+        "commonName": "clock"
+      },
+      "lock": {
+        "id": "XkaSssewbJSt",
+        "commonName": "lock"
+      },
+      "arrow-right": {
+        "id": "b8rKT75QG14x",
+        "commonName": "right"
+      },
+      "search": {
+        "id": "XU3XKgdpT0qG",
+        "commonName": "search"
+      },
+      "calendar": {
+        "id": "vwGXRtPWrZSn",
+        "commonName": "calendar"
+      },
+      "copy": {
+        "id": "pNYOTp5DinZ3",
+        "commonName": "copy"
+      },
+      "sun": {
+        "id": "JHsm5oZeWqae",
+        "commonName": "sun"
+      },
+      "moon": {
+        "id": "xlD3xOrQjTJO",
+        "commonName": "crescent-moon"
+      }
+    }
+  }
+}
