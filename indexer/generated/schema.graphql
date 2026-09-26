@@ -29,6 +29,8 @@ type Query {
   auctions(where: auctionFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): auctionPage!
   strategyPost(id: String!): strategyPost
   strategyPosts(where: strategyPostFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): strategyPostPage!
+  lender(id: String!): lender
+  lenders(where: lenderFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): lenderPage!
   _meta: Meta
 }
 
@@ -633,4 +635,56 @@ input strategyPostFilter {
   timestamp_lt: BigInt
   timestamp_gte: BigInt
   timestamp_lte: BigInt
+}
+
+type lender {
+  id: String!
+  deposited: BigInt!
+  withdrawn: BigInt!
+  updatedAt: BigInt!
+}
+
+type lenderPage {
+  items: [lender!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input lenderFilter {
+  AND: [lenderFilter]
+  OR: [lenderFilter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  deposited: BigInt
+  deposited_not: BigInt
+  deposited_in: [BigInt]
+  deposited_not_in: [BigInt]
+  deposited_gt: BigInt
+  deposited_lt: BigInt
+  deposited_gte: BigInt
+  deposited_lte: BigInt
+  withdrawn: BigInt
+  withdrawn_not: BigInt
+  withdrawn_in: [BigInt]
+  withdrawn_not_in: [BigInt]
+  withdrawn_gt: BigInt
+  withdrawn_lt: BigInt
+  withdrawn_gte: BigInt
+  withdrawn_lte: BigInt
+  updatedAt: BigInt
+  updatedAt_not: BigInt
+  updatedAt_in: [BigInt]
+  updatedAt_not_in: [BigInt]
+  updatedAt_gt: BigInt
+  updatedAt_lt: BigInt
+  updatedAt_gte: BigInt
+  updatedAt_lte: BigInt
 }
