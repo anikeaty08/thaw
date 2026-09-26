@@ -18,6 +18,7 @@ import { MockVotingEscrow } from "../src/adapters/mocks/MockVotingEscrow.sol";
 import { MockRewardToken } from "../src/adapters/mocks/MockRewardToken.sol";
 import { VeBTCAdapter } from "../src/adapters/VeBTCAdapter.sol";
 import { FixedPriceFeed } from "../src/oracle/FixedPriceFeed.sol";
+import { ThawFaucet } from "../src/testnet/ThawFaucet.sol";
 import { IRouter } from "../src/interfaces/IRouter.sol";
 import { CollateralConfig, Mode } from "../src/interfaces/ILoanManager.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -152,6 +153,16 @@ contract Deploy is Script {
             MockRewardToken(musd).mint(deployer, 10_000_000e18);
             MockRewardToken(musd).transferOwnership(address(mockAdapter));
             console.log("MUSD feed:", address(musdFeed));
+
+            // Public faucet so any wallet can try the app: it mints demo locks (owns the mock ve)
+            // and presets their rewards (owns the mock adapter). Admin stays reachable via
+            // faucet.execute. Harvest votes need the adapter registered as the ve's voter.
+            ThawFaucet faucet = new ThawFaucet(deployer, IERC20(musd), mockVE, mockAdapter);
+            IERC20(musd).transfer(address(faucet), 5_000_000e18);
+            mockVE.setVoterContract(address(mockAdapter));
+            mockVE.transferOwnership(address(faucet));
+            mockAdapter.transferOwnership(address(faucet));
+            console.log("ThawFaucet:", address(faucet));
         }
 
         vm.stopBroadcast();
