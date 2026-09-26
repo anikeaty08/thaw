@@ -1,5 +1,5 @@
 import { ponder } from "ponder:registry";
-import { vaultFlow } from "ponder:schema";
+import { lender, vaultFlow } from "ponder:schema";
 
 function logId(event: { transaction: { hash: `0x${string}` }; log: { logIndex: number } }) {
   return `${event.transaction.hash}-${event.log.logIndex}`;
@@ -54,4 +54,41 @@ ponder.on("TMUSDVault:PulledFromMSR", async ({ event, context }) => {
     timestamp: event.block.timestamp,
     txHash: event.transaction.hash,
   });
+});
+
+ponder.on("TMUSDVault:Deposit", async ({ event, context }) => {
+  await context.db
+    .insert(lender)
+    .values({ id: event.args.owner, deposited: event.args.assets, updatedAt: event.block.timestamp })
+    .onConflictDoUpdate((row) => ({ deposited: row.deposited + event.args.assets, updatedAt: event.block.timestamp }));
+  await context.db.insert(vaultFlow).values({
+    id: logId(event),
+    kind: "deposit",
+    amount: event.args.assets,
+    counterparty: event.args.owner,
+    timestamp: event.block.timestamp,
+    txHash: event.transaction.hash,
+  });
+});
+
+ponder.on("TMUSDVault:Withdraw", async ({ event, context }) => {
+  await context.db
+    .insert(lender)
+    .values({ id: event.args.owner, withdrawn: event.args.assets, updatedAt: event.block.timestamp })
+    .onConflictDoUpdate((row) => ({ withdrawn: row.withdrawn + event.args.assets, updatedAt: event.block.timestamp }));
+  await context.db.insert(vaultFlow).values({
+    id: logId(event),
+    kind: "withdraw",
+    amount: event.args.assets,
+    counterparty: event.args.owner,
+    timestamp: event.block.timestamp,
+    txHash: event.transaction.hash,
+  });
+});
+
+ponder.on("TMUSDVault:RedeemRequested", async ({ event, context }) => {
+  await context.db
+    .insert(lender)
+    .values({ id: event.args.owner, withdrawn: event.args.assets, updatedAt: event.block.timestamp })
+    .onConflictDoUpdate((row) => ({ withdrawn: row.withdrawn + event.args.assets, updatedAt: event.block.timestamp }));
 });

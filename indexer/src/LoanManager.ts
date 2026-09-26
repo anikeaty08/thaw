@@ -45,7 +45,7 @@ ponder.on("LoanManager:RepayShareUpdated", async ({ event, context }) => {
 
 ponder.on("LoanManager:MissedEpochRecorded", async ({ event, context }) => {
   await context.db.update(loan, { id: event.args.loanId }).set({
-    missedEpochs: event.args.missedEpochs,
+    missedEpochs: Number(event.args.missedEpochs), // uint64 in the event, integer column
   });
 });
 

@@ -103,3 +103,12 @@ export const harvestEventRelations = relations(harvestEvent, ({ one }) => ({
 export const voteEventRelations = relations(voteEvent, ({ one }) => ({
   loan: one(loan, { fields: [voteEvent.loanId], references: [loan.id] }),
 }));
+
+// Per-lender cost basis so the app can show "earned so far" = current share value − net deposited.
+// A queued redemption counts as withdrawn when requested: the shares leave the lender then.
+export const lender = onchainTable("lender", (t) => ({
+  id: t.hex().primaryKey(), // lender address (lowercase)
+  deposited: t.bigint().notNull().default(0n),
+  withdrawn: t.bigint().notNull().default(0n),
+  updatedAt: t.bigint().notNull(),
+}));
