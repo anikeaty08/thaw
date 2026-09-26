@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/Button";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { Slider } from "@/components/ui/Slider";
 import { Icon } from "@/components/ui/Icon";
+import { useToast } from "@/components/providers/ToastProvider";
 
 type Mode = "advance" | "creditLine";
 type Step = "configure" | "approving" | "approved" | "borrowing" | "done";
@@ -85,6 +86,22 @@ export function BorrowDrawer({ tokenId, onClose }: { tokenId: bigint; onClose: (
 
   const { writeContract: writeBorrow, data: borrowHash, error: borrowError, reset: resetBorrow } = useWriteContract();
   const txError = approveError ?? borrowError;
+  const toast = useToast();
+
+  useEffect(() => {
+    if (approveHash) toast.track(approveHash, { pending: `Moving lock #${tokenId} into escrow`, success: `Lock #${tokenId} is approved` });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [approveHash]);
+
+  useEffect(() => {
+    if (borrowHash)
+      toast.track(borrowHash, {
+        pending: `Borrowing ${amountNum.toFixed(0)} MUSD`,
+        success: `Borrowed ${amountNum.toFixed(0)} MUSD`,
+        successBody: "Rewards start paying it down next Thursday.",
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [borrowHash]);
 
   // A rejected or failed wallet prompt drops the flow back to the form.
   useEffect(() => {

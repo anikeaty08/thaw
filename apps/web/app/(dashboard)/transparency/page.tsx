@@ -138,6 +138,8 @@ export default function TransparencyPage() {
 }
 
 const FLOW_KINDS: Record<string, { label: string; icon: IconName }> = {
+  deposit: { label: "Lender deposit", icon: "wallet" },
+  withdraw: { label: "Lender withdrawal", icon: "wallet" },
   lend: { label: "Lent to a loan", icon: "coins" },
   repay: { label: "Repayment received", icon: "drop" },
   bad_debt: { label: "Bad debt realized", icon: "warning" },

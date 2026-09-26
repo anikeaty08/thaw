@@ -102,6 +102,10 @@ function AuctionCard({ auction }: { auction: AuctionRow }) {
     buy.run(
       { address: addresses.musd, abi: erc20Abi, functionName: "approve", args: [addresses.liquidator, priceWad] },
       { address: addresses.liquidator, abi: abis.liquidator as any, functionName: "buy", args: [BigInt(auction.id)] },
+      {
+        approve: { pending: "Approving MUSD for the auction", success: "MUSD approved" },
+        action: { pending: `Buying lock #${auction.tokenId}`, success: `Lock #${auction.tokenId} is yours` },
+      },
     );
   }
 

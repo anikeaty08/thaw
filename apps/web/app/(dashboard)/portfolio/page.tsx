@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import clsx from "clsx";
 import { useAccount, useReadContract } from "wagmi";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { addresses, erc721Abi } from "@/lib/contracts";
-import { isConfigured, useMaxBorrow } from "@/lib/hooks";
+import { isConfigured, useFaucet, useMaxBorrow, useOwnedLocks, type OwnedLock } from "@/lib/hooks";
 import { fetchLoansForBorrower, type LoanRow } from "@/lib/graphql";
 import { useAsync } from "@/lib/useAsync";
 import { formatMusd } from "@/lib/format";
@@ -26,6 +26,7 @@ export default function PortfolioPage() {
   const [lookupInput, setLookupInput] = useState("");
   const [lookupTokenId, setLookupTokenId] = useState<bigint | null>(null);
 
+  const owned = useOwnedLocks(address);
   const loans = useAsync<LoanRow[]>(address && isConfigured ? () => fetchLoansForBorrower(address) : null, [], [address]);
   const openLoans = loans.data.filter((l) => !l.closed);
   const outstanding = openLoans.reduce((sum, l) => sum + BigInt(l.principal), 0n);
@@ -67,7 +68,7 @@ export default function PortfolioPage() {
                 <IndexerError what="your loans" onRetry={loans.retry} />
               ) : openLoans.length === 0 ? (
                 <EmptyState icon="snowflake" title="No open loans" compact>
-                  Look up one of your locks below to see how much you can borrow against it.
+                  Pick one of your locks below to see how much you can borrow against it.
                 </EmptyState>
               ) : (
                 <ul className="grid gap-3">
@@ -82,46 +83,78 @@ export default function PortfolioPage() {
           </section>
 
           <section className="mt-12" aria-labelledby="new-loan">
-            <h2 id="new-loan" className="section-title">
-              Borrow against a lock
-            </h2>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-mist-400">
-              Enter the token ID of a veMEZO or veBTC lock you own. You'll find it on Mezo Earn or on{" "}
-              <a
-                href="https://explorer.test.mezo.org"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-0.5 text-frost-300 underline decoration-frost-400/30 underline-offset-2 hover:decoration-frost-300"
-              >
-                the explorer
-                <Icon name="external" size={12} />
-              </a>
-              .
-            </p>
-            <form onSubmit={handleLookup} className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <label className="field sm:w-64">
-                <Icon name="search" size={16} className="text-mist-500" />
-                <span className="sr-only">Lock token ID</span>
-                <input
-                  inputMode="numeric"
-                  value={lookupInput}
-                  onChange={(e) => setLookupInput(e.target.value.replace(/[^0-9]/g, ""))}
-                  placeholder="Token ID, like 42"
-                />
-              </label>
-              <Button type="submit" variant="secondary" disabled={!lookupInput}>
-                Check this lock
-              </Button>
-            </form>
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <h2 id="new-loan" className="section-title">
+                  Your locks
+                </h2>
+                <p className="mt-1.5 text-sm text-mist-400">veNFTs in this wallet that you can borrow against.</p>
+              </div>
+            </div>
 
-            {lookupTokenId !== null && (
-              <PositionLookup tokenId={lookupTokenId} owner={address} onBorrow={() => setDrawerTokenId(lookupTokenId)} />
-            )}
+            <FaucetCard address={address} onDripped={owned.refetch} />
+
+            <div className="mt-4">
+              {owned.isLoading ? (
+                <SkeletonRows rows={2} height={148} />
+              ) : owned.isError ? (
+                <p className="flex items-center gap-2 text-sm text-mist-400">
+                  <Icon name="warning" size={16} className="text-ember-400" />
+                  Couldn't read your locks from the chain. Refresh to try again.
+                </p>
+              ) : owned.locks.length === 0 ? (
+                <EmptyState icon="lock" title="No locks in this wallet" compact>
+                  Locks already backing a loan are held in escrow and show up under Open loans.
+                </EmptyState>
+              ) : (
+                <ul className="grid gap-3 sm:grid-cols-2">
+                  {owned.locks.map((lock) => (
+                    <li key={lock.tokenId.toString()}>
+                      <LockCard lock={lock} onBorrow={() => setDrawerTokenId(lock.tokenId)} />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <details className="group mt-6">
+              <summary className="inline-flex min-h-[36px] cursor-pointer list-none items-center gap-1.5 text-sm text-mist-400 hover:text-frostwhite">
+                <Icon name="arrow-right" size={14} className="transition-transform group-open:rotate-90" />
+                Don't see a lock? Look it up by token ID
+              </summary>
+              <form onSubmit={handleLookup} className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <label className="field sm:w-64">
+                  <Icon name="search" size={16} className="text-mist-500" />
+                  <span className="sr-only">Lock token ID</span>
+                  <input
+                    inputMode="numeric"
+                    value={lookupInput}
+                    onChange={(e) => setLookupInput(e.target.value.replace(/[^0-9]/g, ""))}
+                    placeholder="Token ID, like 42"
+                  />
+                </label>
+                <Button type="submit" variant="secondary" disabled={!lookupInput}>
+                  Check this lock
+                </Button>
+              </form>
+              {lookupTokenId !== null && (
+                <PositionLookup tokenId={lookupTokenId} owner={address} onBorrow={() => setDrawerTokenId(lookupTokenId)} />
+              )}
+            </details>
           </section>
         </>
       )}
 
-      {drawerTokenId !== null && <BorrowDrawer tokenId={drawerTokenId} onClose={() => setDrawerTokenId(null)} />}
+      {drawerTokenId !== null && (
+        <BorrowDrawer
+          tokenId={drawerTokenId}
+          onClose={() => {
+            setDrawerTokenId(null);
+            owned.refetch();
+            loans.retry();
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -227,6 +260,70 @@ function PositionLookup({ tokenId, owner, onBorrow }: { tokenId: bigint; owner: 
           Set up a loan
         </Button>
       </div>
+    </div>
+  );
+}
+
+function LockCard({ lock, onBorrow }: { lock: OwnedLock; onBorrow: () => void }) {
+  return (
+    <div className="frost-panel flex h-full flex-col px-5 py-4">
+      <div className="flex items-center gap-2">
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-glacier-700 bg-glacier-800 text-frost-300">
+          <Icon name="lock" size={16} />
+        </span>
+        <span className="font-semibold text-frostwhite">Lock #{lock.tokenId.toString()}</span>
+      </div>
+      <dl className="mt-4 grid grid-cols-2 gap-3">
+        <div>
+          <dt className="text-xs text-mist-400">Advance up to</dt>
+          <dd className="tabular mt-0.5 font-semibold text-frost-200">
+            {formatMusd(lock.maxAdvance)} <span className="text-xs font-normal text-mist-500">MUSD</span>
+          </dd>
+        </div>
+        <div>
+          <dt className="text-xs text-mist-400">Credit Line up to</dt>
+          <dd className="tabular mt-0.5 font-semibold text-ember-400">
+            {formatMusd(lock.maxCreditLine)} <span className="text-xs font-normal text-mist-500">MUSD</span>
+          </dd>
+        </div>
+      </dl>
+      <Button onClick={onBorrow} className="mt-4 w-full" disabled={!lock.maxAdvance && !lock.maxCreditLine}>
+        Borrow against this lock
+      </Button>
+    </div>
+  );
+}
+
+function FaucetCard({ address, onDripped }: { address: `0x${string}` | undefined; onDripped: () => void }) {
+  const faucet = useFaucet(address);
+  const [now] = useState(() => Math.floor(Date.now() / 1000));
+
+  // Refresh the lock list once the drip is mined.
+  useEffect(() => {
+    if (faucet.isDone) onDripped();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [faucet.isDone]);
+
+  if (!faucet.available) return null;
+  const coolingDown = faucet.readyAt > now;
+  const hoursLeft = Math.ceil((faucet.readyAt - now) / 3600);
+
+  return (
+    <div className="mt-4 flex flex-col gap-4 rounded-2xl border border-frost-400/30 bg-frost-400/[0.06] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex items-start gap-3">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-frost-400/15 text-frost-300">
+          <Icon name="snowflake" size={18} />
+        </span>
+        <div>
+          <p className="text-sm font-medium text-frostwhite">Trying Thaw on testnet?</p>
+          <p className="mt-0.5 text-sm text-mist-400">
+            Get 1,000 test MUSD and a demo lock that earns 60 MUSD a week. You'll need a little testnet BTC for fees.
+          </p>
+        </div>
+      </div>
+      <Button onClick={faucet.drip} disabled={faucet.isBusy || coolingDown} className="w-full shrink-0 sm:w-auto">
+        {faucet.isBusy ? "Sending…" : coolingDown ? `Available in ${hoursLeft}h` : "Get test tokens"}
+      </Button>
     </div>
   );
 }
