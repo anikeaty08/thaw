@@ -22,6 +22,7 @@ export const addresses = {
   musd: addr(process.env.NEXT_PUBLIC_MUSD_ADDRESS),
   mockAdapter: addr(process.env.NEXT_PUBLIC_MOCK_ADAPTER_ADDRESS),
   mockVe: addr(process.env.NEXT_PUBLIC_MOCK_VE_ADDRESS),
+  faucet: addr(process.env.NEXT_PUBLIC_FAUCET_ADDRESS),
 } as const;
 
 export const abis = {
@@ -46,4 +47,17 @@ export const erc721Abi = [
   { type: "function", name: "ownerOf", stateMutability: "view", inputs: [{ type: "uint256" }], outputs: [{ type: "address" }] },
   { type: "function", name: "approve", stateMutability: "nonpayable", inputs: [{ type: "address" }, { type: "uint256" }], outputs: [] },
   { type: "function", name: "getApproved", stateMutability: "view", inputs: [{ type: "uint256" }], outputs: [{ type: "address" }] },
+] as const;
+
+/** Testnet-only ThawFaucet (contracts/src/testnet/ThawFaucet.sol). */
+export const faucetAbi = [
+  { type: "function", name: "drip", stateMutability: "nonpayable", inputs: [], outputs: [{ type: "uint256" }] },
+  { type: "function", name: "nextDripAt", stateMutability: "view", inputs: [{ type: "address" }], outputs: [{ type: "uint256" }] },
+  { type: "function", name: "musdPerDrip", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
+] as const;
+
+/** The mock veNFT isn't ERC721Enumerable; `nextId` bounds a scan of ownerOf. */
+export const mockVeAbi = [
+  { type: "function", name: "nextId", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
+  { type: "function", name: "ownerOf", stateMutability: "view", inputs: [{ type: "uint256" }], outputs: [{ type: "address" }] },
 ] as const;

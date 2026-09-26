@@ -104,3 +104,17 @@ export async function fetchVaultFlows(limit = 100): Promise<VaultFlowRow[]> {
   );
   return data.vaultFlows.items;
 }
+
+export interface LenderRow {
+  deposited: string;
+  withdrawn: string;
+}
+
+/** A lender's cost basis; null if they've never deposited. */
+export async function fetchLender(address: string): Promise<LenderRow | null> {
+  const data = await query<{ lender: LenderRow | null }>(
+    `query Lender($id: String!) { lender(id: $id) { deposited withdrawn } }`,
+    { id: address.toLowerCase() },
+  );
+  return data.lender;
+}

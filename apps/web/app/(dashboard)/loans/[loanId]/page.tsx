@@ -15,6 +15,8 @@ import { HarvestBreakdownChart, type HarvestBar } from "@/components/charts/Harv
 import { NotConfiguredBanner } from "@/components/ui/NotConfiguredBanner";
 import { Icon } from "@/components/ui/Icon";
 import Link from "next/link";
+import { useReadContract } from "wagmi";
+import { projectPayoff } from "@/lib/projection";
 
 export default function LoanDetailPage() {
   const params = useParams<{ loanId: string }>();
@@ -63,6 +65,48 @@ export default function LoanDetailPage() {
     return points;
   })();
 
+  // Weekly paydown for the projection: what recent harvests actually paid, or before the first
+  // harvest, RiskEngine's own estimate (income × haircut × repay share).
+  const weeklyIncome = useReadContract({
+    address: addresses.riskEngine,
+    abi: abis.riskEngine,
+    functionName: "estimateWeeklyIncomeUSD",
+    args: loanData ? [loanData.adapter as `0x${string}`, loanData.tokenId] : undefined,
+    query: { enabled: isConfigured && !!loanData },
+  });
+  const riskConfig = useReadContract({
+    address: addresses.riskEngine,
+    abi: abis.riskEngine,
+    functionName: "configOf",
+    args: loanData ? [loanData.adapter as `0x${string}`] : undefined,
+    query: { enabled: isConfigured && !!loanData },
+  });
+
+  const recent = harvests.slice(-4);
+  const observedPaydown = recent.length ? recent.reduce((sum, h) => sum + Number(h.toDebt) / 1e18, 0) / recent.length : 0;
+  const haircutBps = (riskConfig.data as { incomeHaircutBps?: number } | undefined)?.incomeHaircutBps ?? 0;
+  const estimatedPaydown =
+    loanData && weeklyIncome.data !== undefined
+      ? ((Number(weeklyIncome.data as bigint) / 1e18) * haircutBps * loanData.repayShareBps) / 1e8
+      : 0;
+  const weeklyPaydown = observedPaydown || estimatedPaydown;
+  const currentDebt = debt.data !== undefined ? Number(debt.data as bigint) / 1e18 : undefined;
+  const projection =
+    loanData && !loanData.closed && !loanData.liquidating && currentDebt !== undefined
+      ? projectPayoff(currentDebt, weeklyPaydown, loanData.aprBps)
+      : [];
+  const payoffLabel = projection.length ? formatDate(projection[projection.length - 1].timestamp) : undefined;
+
+  const chartData: DebtPoint[] = (() => {
+    if (!projection.length || currentDebt === undefined) return meltData;
+    const nowSec = Math.floor(Date.now() / 1000);
+    return [
+      ...meltData,
+      { label: "Now", timestamp: nowSec, debt: currentDebt, projected: currentDebt },
+      ...projection.map((p) => ({ label: formatDate(p.timestamp), timestamp: p.timestamp, projected: p.debt })),
+    ];
+  })();
+
   const harvestBars: HarvestBar[] = harvests.map((h) => ({
     label: `E${h.epoch}`,
     toDebt: Number(h.toDebt) / 1e18,
@@ -78,6 +122,10 @@ export default function LoanDetailPage() {
     repay.run(
       { address: addresses.musd, abi: erc20Abi, functionName: "approve", args: [addresses.loanManager, amountWad] },
       { address: addresses.loanManager, abi: abis.loanManager as any, functionName: "repay", args: [loanId, amountWad] },
+      {
+        approve: { pending: "Approving MUSD for repayment", success: "MUSD approved" },
+        action: { pending: `Repaying ${repayAmount} MUSD`, success: `Repaid ${repayAmount} MUSD` },
+      },
     );
   }
 
@@ -142,7 +190,7 @@ export default function LoanDetailPage() {
       <section className="frost-panel mt-8 px-4 py-5 sm:px-6 sm:py-6">
         <h2 className="section-title">Debt over time</h2>
         <div className="mt-4">
-          <DebtMeltChart data={meltData} />
+          <DebtMeltChart data={chartData} payoffLabel={payoffLabel} />
         </div>
       </section>
 
