@@ -1,0 +1,45 @@
+# Render Blueprint for the Thaw indexer (the "backend" the frontend talks to for loan history,
+# auctions and vault activity). Everything else in this repo is either on Vercel (apps/web,
+# apps/bot's webhook) or GitHub Actions (services/keeper, apps/bot's notify jobs) — see
+# DEPLOYMENT.md for the full picture and why.
+#
+# Free tier notes:
+# - Render's free Web Service plan spins the instance down after ~15 minutes idle and takes
+#   roughly 30-60s to wake on the next request. apps/web's BackendStatus component
+#   (components/ui/BackendStatus.tsx) pings /ready on load specifically to trigger that wake-up
+#   and shows "Waking up..." while it happens, so visitors aren't left looking at a blank error.
+# - This service needs a Postgres database. Render's own free Postgres expires after 90 days;
+#   the DATABASE_URL below is left blank on purpose (`sync: false`) so you paste in your own —
+#   e.g. a Supabase free-tier project's pooled connection string — from the Render dashboard
+#   rather than committing it here.
+#
+# Deploy: connect this repo in the Render dashboard, it reads this file automatically ("Blueprint").
+# Or without a Blueprint: New -> Web Service, root directory `indexer`, environment Node.
+
+services:
+  - type: web
+    name: thaw-indexer
+    runtime: node
+    plan: free
+    region: singapore
+    rootDir: indexer
+    buildCommand: npm install
+    startCommand: npx ponder start --schema thaw --port ${PORT:-42069} --hostname 0.0.0.0
+    healthCheckPath: /ready
+    envVars:
+      - key: DATABASE_URL
+        sync: false # paste your Postgres connection string in the Render dashboard
+      - key: PONDER_RPC_URL_MEZO_TESTNET
+        value: https://rpc.test.mezo.org
+      - key: START_BLOCK
+        sync: false # block LoanManager was deployed at (see contracts/broadcast/.../run-latest.json)
+      - key: LOAN_MANAGER_ADDRESS
+        sync: false
+      - key: HARVESTER_ADDRESS
+        sync: false
+      - key: TMUSD_VAULT_ADDRESS
+        sync: false
+      - key: DUTCH_AUCTION_LIQUIDATOR_ADDRESS
+        sync: false
+      - key: STRATEGY_REGISTRY_ADDRESS
+        sync: false
