@@ -32,7 +32,8 @@ jobs:
         run: forge test -vvv --gas-report
 
       - name: Coverage
-        run: forge coverage --report summary
+        # via_ir is required (stack depth); --ir-minimum keeps coverage on the IR pipeline.
+        run: forge coverage --ir-minimum --report summary
 
       - name: Slither static analysis
         uses: crytic/slither-action@v0.4.0
