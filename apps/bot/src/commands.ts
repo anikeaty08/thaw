@@ -26,12 +26,12 @@ export function registerCommands(bot: Bot): void {
     }
     // Trust-on-first-use: this does not prove wallet ownership. Good enough for a hackathon demo;
     // production should require a signed message (e.g. SIWE) before linking a chat to an address.
-    linkWallet(ctx.chat.id, arg as Address);
+    await linkWallet(ctx.chat.id, arg as Address);
     await ctx.reply(`Linked ${arg} to this chat. Try /loans.`);
   });
 
   bot.command("loans", async (ctx) => {
-    const wallet = getLinkedWallet(ctx.chat.id);
+    const wallet = await getLinkedWallet(ctx.chat.id);
     if (!wallet) return ctx.reply("No wallet linked yet. Run /connect <address> first.");
 
     const loans = await fetchLoansForBorrower(wallet);
