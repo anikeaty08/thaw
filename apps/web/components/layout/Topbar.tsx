@@ -5,6 +5,7 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { Wordmark } from "@/components/ui/ThawMark";
 import { NextHarvest } from "@/components/ui/NextHarvest";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { BackendStatus } from "@/components/ui/BackendStatus";
 
 export function Topbar() {
   return (
@@ -12,9 +13,11 @@ export function Topbar() {
       <Link href="/" className="lg:hidden" aria-label="Thaw home">
         <Wordmark size={22} />
       </Link>
-      <div className="hidden lg:block">
+      <div className="hidden items-center gap-4 lg:flex">
         <NextHarvest variant="inline" />
+        <BackendStatus />
       </div>
+      <BackendStatus className="lg:hidden" />
       <div className="flex items-center gap-2">
         <ThemeToggle />
         <ConnectButton
