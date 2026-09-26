@@ -34,7 +34,9 @@ contract ThawFaucet is Ownable {
     error CoolingDown(uint256 availableAt);
     error CallFailed(bytes reason);
 
-    constructor(address initialOwner, IERC20 _musd, MockVotingEscrow _ve, MockVeAdapter _adapter) Ownable(initialOwner) {
+    constructor(address initialOwner, IERC20 _musd, MockVotingEscrow _ve, MockVeAdapter _adapter)
+        Ownable(initialOwner)
+    {
         musd = _musd;
         ve = _ve;
         adapter = _adapter;
