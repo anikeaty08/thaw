@@ -1,0 +1,64 @@
+name: Keeper
+
+# Runs the keeper's two jobs on a schedule instead of hosting services/keeper as an always-on
+# process. GitHub's scheduled cron is best-effort (can slip a few minutes under load, and GitHub
+# may pause a schedule after ~60 days with no repo activity) — fine for a weekly harvest and a
+# health sweep, not a substitute for sub-minute liquidation response.
+on:
+  schedule:
+    - cron: "5 0 * * 4"   # Thursday 00:05 UTC — harvest (docs/THAW_SYSTEM_DESIGN.md §10.1)
+    - cron: "*/10 * * * *" # every 10 min — liquidation health sweep (§10.2)
+  workflow_dispatch:
+    inputs:
+      job:
+        description: "Job to run manually"
+        required: true
+        type: choice
+        options: [harvest, health]
+        default: health
+
+concurrency:
+  group: thaw-keeper
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: services/keeper
+    env:
+      RPC_URL: ${{ vars.RPC_URL || 'https://rpc.test.mezo.org' }}
+      CHAIN_ID: ${{ vars.CHAIN_ID || '31611' }}
+      KEEPER_PRIVATE_KEY: ${{ secrets.KEEPER_PRIVATE_KEY }}
+      HARVESTER_ADDRESS: ${{ vars.HARVESTER_ADDRESS }}
+      LOAN_MANAGER_ADDRESS: ${{ vars.LOAN_MANAGER_ADDRESS }}
+      DUTCH_AUCTION_LIQUIDATOR_ADDRESS: ${{ vars.DUTCH_AUCTION_LIQUIDATOR_ADDRESS }}
+      INDEXER_URL: ${{ vars.INDEXER_URL }}
+      HARVEST_BATCH_SIZE: ${{ vars.HARVEST_BATCH_SIZE || '25' }}
+      MIN_BOUNTY_TO_GAS_RATIO: ${{ vars.MIN_BOUNTY_TO_GAS_RATIO || '1.2' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: services/keeper/package-lock.json
+      - run: npm ci
+      - name: Decide which job this run is
+        id: which
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "job=${{ inputs.job }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event.schedule }}" = "5 0 * * 4" ]; then
+            echo "job=harvest" >> "$GITHUB_OUTPUT"
+          else
+            echo "job=health" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Harvest
+        if: steps.which.outputs.job == 'harvest'
+        run: npm run harvest:once
+      - name: Health / liquidation sweep
+        if: steps.which.outputs.job == 'health'
+        run: npm run liquidate:once
