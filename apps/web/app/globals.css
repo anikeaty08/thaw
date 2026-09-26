@@ -1,0 +1,173 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Channels only, so Tailwind can apply opacity (bg-glacier-900/95). Dark is the default. */
+  :root {
+    color-scheme: dark;
+    --glacier-950: 0 5 11;
+    --glacier-900: 5 11 18;
+    --glacier-800: 11 22 34;
+    --glacier-700: 23 37 54;
+    --glacier-600: 43 64 88;
+    --glacier-500: 61 86 115;
+    --frost-50: 238 246 255;
+    --frost-100: 220 236 255;
+    --frost-200: 181 217 255;
+    --frost-300: 124 192 255;
+    --frost-400: 45 156 255;
+    --frost-500: 8 124 255;
+    --frost-600: 0 82 255;
+    --ember-300: 255 196 138;
+    --ember-400: 255 157 92;
+    --ember-500: 247 127 58;
+    --ember-600: 221 100 37;
+    --ink: 245 249 255;
+    --mist-300: 180 193 209;
+    --mist-400: 139 154 173;
+    --mist-500: 107 124 146;
+    --success: 59 214 160;
+    --danger: 255 128 128;
+    --shadow-panel: 0 24px 90px -20px rgba(0, 0, 0, 0.55);
+    --glow-strength: 0.16;
+  }
+
+  /* White theme: the reference site's light tokens (#f4f7fb page, white panels, #d5deea hairlines,
+     #087cff / #0052ff accent). Text-role shades are darkened to keep 4.5:1 on white. */
+  [data-theme="light"] {
+    color-scheme: light;
+    --glacier-950: 244 247 251;
+    --glacier-900: 255 255 255;
+    --glacier-800: 238 243 249;
+    --glacier-700: 213 222 234;
+    --glacier-600: 183 197 215;
+    --glacier-500: 135 148 166;
+    --frost-50: 238 246 255;
+    --frost-100: 11 61 145;
+    --frost-200: 10 88 196;
+    --frost-300: 10 106 224;
+    --frost-400: 8 124 255;
+    --frost-500: 0 82 255;
+    --frost-600: 0 64 214;
+    --ember-300: 214 98 28;
+    --ember-400: 201 84 20;
+    --ember-500: 232 102 31;
+    --ember-600: 192 79 18;
+    --ink: 7 17 31;
+    --mist-300: 51 65 79;
+    --mist-400: 94 109 128;
+    --mist-500: 102 117 138;
+    --success: 12 155 109;
+    --danger: 216 65 65;
+    --shadow-panel: 0 22px 70px -24px rgba(26, 48, 78, 0.18);
+    --glow-strength: 0.10;
+  }
+
+  html {
+    background: rgb(var(--glacier-950));
+  }
+
+  body {
+    @apply bg-glacier-950 text-frostwhite antialiased;
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  ::selection {
+    background: rgb(var(--frost-500));
+    color: #fff;
+  }
+
+  :focus-visible {
+    outline: 2px solid rgb(var(--frost-400));
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  * {
+    scrollbar-color: rgb(var(--glacier-600)) transparent;
+    scrollbar-width: thin;
+  }
+
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* The one surface: near-opaque navy, a crisp 1px border, and a deep soft shadow. */
+  .frost-panel {
+    @apply relative rounded-2xl border border-glacier-700 bg-glacier-900/95 shadow-frost;
+  }
+
+  .frost-panel-faceted {
+    @apply frost-panel;
+  }
+
+  /* Blueprint grid that fades out toward the bottom. Used behind heroes only. */
+  .bg-grid {
+    background-image: linear-gradient(rgb(var(--glacier-700)) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(var(--glacier-700)) 1px, transparent 1px);
+    background-size: 44px 44px;
+    -webkit-mask-image: linear-gradient(to bottom, #000, transparent 85%);
+    mask-image: linear-gradient(to bottom, #000, transparent 85%);
+  }
+
+  /* Cold light pooling behind the hero. */
+  .hero-glow {
+    background: radial-gradient(circle at 72% 28%, rgb(45 156 255 / var(--glow-strength)), transparent 36%),
+      radial-gradient(circle at 18% 88%, rgba(8, 124, 255, 0.07), transparent 30%);
+  }
+
+  .page-glow {
+    background: radial-gradient(ellipse 60% 40% at 50% -10%, rgba(45, 156, 255, 0.09), transparent 70%);
+  }
+
+  .field {
+    @apply flex min-h-[46px] items-center gap-2.5 rounded-[10px] border border-glacier-700 bg-glacier-950/60 px-3.5 text-sm text-frostwhite transition-[border-color,box-shadow] duration-200 focus-within:border-frost-400 focus-within:shadow-[0_0_0_3px_rgba(45,156,255,0.15)];
+  }
+
+  .field input {
+    @apply w-full bg-transparent py-2.5 placeholder:text-mist-500 focus:outline-none;
+  }
+
+  .section-title {
+    @apply text-base font-semibold tracking-[-0.01em] text-frostwhite;
+  }
+
+  .display {
+    @apply font-display font-bold tracking-[-0.05em];
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Recharts draws with SVG presentation attributes; CSS wins over those, so theme them here.
+   Kept outside @layer on purpose: Tailwind drops layered rules whose classes it never sees in source. */
+.recharts-cartesian-grid line {
+  stroke: rgb(var(--glacier-700));
+}
+.recharts-cartesian-axis-tick-value {
+  fill: rgb(var(--mist-400));
+}
+.recharts-active-dot circle,
+.recharts-reference-dot-dot {
+  stroke: rgb(var(--glacier-950));
+}
+.recharts-reference-line-line {
+  stroke: rgb(var(--glacier-500));
+}

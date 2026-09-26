@@ -1,0 +1,108 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  contracts:
+    name: Contracts (Foundry)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contracts
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Check formatting
+        run: forge fmt --check
+
+      - name: Build (London EVM, per docs/THAW_SYSTEM_DESIGN.md §6.1)
+        run: forge build --sizes
+
+      - name: Unit + fuzz + invariant tests
+        run: forge test -vvv --gas-report
+
+      - name: Coverage
+        # via_ir is required (stack depth); --ir-minimum keeps coverage on the IR pipeline.
+        run: forge coverage --ir-minimum --report summary
+
+      - name: Slither static analysis
+        uses: crytic/slither-action@v0.4.0
+        continue-on-error: true
+        with:
+          target: contracts/
+          slither-config: contracts/slither.config.json
+          fail-on: none
+
+  keeper:
+    name: Keeper service
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/keeper
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: services/keeper/package-lock.json
+      - run: npm install
+      - run: npm run typecheck
+
+  optimizer:
+    name: Optimizer service
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/optimizer
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: services/optimizer/package-lock.json
+      - run: npm install
+      - run: npm run typecheck
+
+  bot:
+    name: Telegram bot
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/bot
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: apps/bot/package-lock.json
+      - run: npm install
+      - run: npm run typecheck
+
+  indexer:
+    name: Indexer (Ponder)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: indexer
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: indexer/package-lock.json
+      - run: npm install
+      - run: npm run typecheck
