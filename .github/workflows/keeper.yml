@@ -42,7 +42,7 @@ jobs:
           node-version: 20
           cache: npm
           cache-dependency-path: services/keeper/package-lock.json
-      - run: npm ci
+      - run: npm ci --workspaces=false
         working-directory: services/keeper
       - name: Decide which job this run is
         id: which
