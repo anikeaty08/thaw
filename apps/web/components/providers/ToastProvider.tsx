@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { useConfig } from "wagmi";
 import { waitForTransactionReceipt } from "wagmi/actions";
+import { useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import clsx from "clsx";
 import { Icon } from "@/components/ui/Icon";
@@ -51,6 +52,7 @@ export function describeTxError(error: unknown): string {
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const config = useConfig();
+  const queryClient = useQueryClient();
   const [toasts, setToasts] = useState<Toast[]>([]);
   const nextId = useRef(1);
   const tracked = useRef(new Set<string>());
@@ -77,6 +79,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       const id = push({ status: "pending", title: labels.pending, body: "Waiting for Mezo to confirm it.", hash });
       waitForTransactionReceipt(config, { hash })
         .then((receipt) => {
+          // Whatever the transaction changed (balances, vault totals, loan debt), re-read it now
+          // rather than waiting for the next poll. This also settles any receipt hook still waiting.
+          void queryClient.invalidateQueries();
           if (receipt.status === "success") {
             update(id, { status: "success", title: labels.success, body: labels.successBody });
           } else {
@@ -85,7 +90,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         })
         .catch(() => update(id, { status: "error", title: "Couldn't confirm the transaction", body: "Check it on the explorer." }));
     },
-    [config, push, update],
+    [config, push, update, queryClient],
   );
 
   const fail = useCallback((title: string, body?: string) => void push({ status: "error", title, body }), [push]);

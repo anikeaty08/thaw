@@ -85,6 +85,12 @@ export function SiteFooter({ variant = "full" }: { variant?: "full" | "compact" 
           </FooterColumn>
 
           <FooterColumn title="Resources">
+            <li>
+              <Link href="/docs" className="footer-link roll-host">
+                <Icon name="document" size={16} />
+                <RollText text="Docs" />
+              </Link>
+            </li>
             {RESOURCES.map((item) => (
               <li key={item.href}>
                 <a href={item.href} target="_blank" rel="noreferrer" className="footer-link roll-host">

@@ -1,9 +1,6 @@
 import { ponder } from "ponder:registry";
 import { lender, vaultFlow } from "ponder:schema";
-
-function logId(event: { transaction: { hash: `0x${string}` }; log: { logIndex: number } }) {
-  return `${event.transaction.hash}-${event.log.logIndex}`;
-}
+import { logId, recordActivity } from "./activity";
 
 ponder.on("TMUSDVault:Lent", async ({ event, context }) => {
   await context.db.insert(vaultFlow).values({
@@ -69,6 +66,7 @@ ponder.on("TMUSDVault:Deposit", async ({ event, context }) => {
     timestamp: event.block.timestamp,
     txHash: event.transaction.hash,
   });
+  await recordActivity(context, event, { account: event.args.owner, kind: "deposit", amount: event.args.assets });
 });
 
 ponder.on("TMUSDVault:Withdraw", async ({ event, context }) => {
@@ -84,6 +82,7 @@ ponder.on("TMUSDVault:Withdraw", async ({ event, context }) => {
     timestamp: event.block.timestamp,
     txHash: event.transaction.hash,
   });
+  await recordActivity(context, event, { account: event.args.owner, kind: "withdraw", amount: event.args.assets });
 });
 
 ponder.on("TMUSDVault:RedeemRequested", async ({ event, context }) => {
@@ -91,4 +90,5 @@ ponder.on("TMUSDVault:RedeemRequested", async ({ event, context }) => {
     .insert(lender)
     .values({ id: event.args.owner, withdrawn: event.args.assets, updatedAt: event.block.timestamp })
     .onConflictDoUpdate((row) => ({ withdrawn: row.withdrawn + event.args.assets, updatedAt: event.block.timestamp }));
+  await recordActivity(context, event, { account: event.args.owner, kind: "withdraw_queued", amount: event.args.assets });
 });

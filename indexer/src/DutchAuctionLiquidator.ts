@@ -1,5 +1,6 @@
 import { ponder } from "ponder:registry";
 import { auction } from "ponder:schema";
+import { recordActivity } from "./activity";
 
 ponder.on("DutchAuctionLiquidator:AuctionStarted", async ({ event, context }) => {
   await context.db.insert(auction).values({
@@ -24,4 +25,5 @@ ponder.on("DutchAuctionLiquidator:AuctionSettled", async ({ event, context }) =>
     badDebt,
     settledAt: event.block.timestamp,
   });
+  await recordActivity(context, event, { account: buyer, kind: "auction_bought", loanId, amount: price });
 });

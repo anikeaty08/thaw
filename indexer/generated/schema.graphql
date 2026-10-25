@@ -31,6 +31,8 @@ type Query {
   strategyPosts(where: strategyPostFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): strategyPostPage!
   lender(id: String!): lender
   lenders(where: lenderFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): lenderPage!
+  activity(id: String!): activity
+  activitys(where: activityFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int): activityPage!
   _meta: Meta
 }
 
@@ -687,4 +689,89 @@ input lenderFilter {
   updatedAt_lt: BigInt
   updatedAt_gte: BigInt
   updatedAt_lte: BigInt
+}
+
+type activity {
+  id: String!
+  account: String!
+  kind: String!
+  loanId: BigInt
+  amount: BigInt
+  timestamp: BigInt!
+  txHash: String!
+}
+
+type activityPage {
+  items: [activity!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input activityFilter {
+  AND: [activityFilter]
+  OR: [activityFilter]
+  id: String
+  id_not: String
+  id_in: [String]
+  id_not_in: [String]
+  id_contains: String
+  id_not_contains: String
+  id_starts_with: String
+  id_ends_with: String
+  id_not_starts_with: String
+  id_not_ends_with: String
+  account: String
+  account_not: String
+  account_in: [String]
+  account_not_in: [String]
+  account_contains: String
+  account_not_contains: String
+  account_starts_with: String
+  account_ends_with: String
+  account_not_starts_with: String
+  account_not_ends_with: String
+  kind: String
+  kind_not: String
+  kind_in: [String]
+  kind_not_in: [String]
+  kind_contains: String
+  kind_not_contains: String
+  kind_starts_with: String
+  kind_ends_with: String
+  kind_not_starts_with: String
+  kind_not_ends_with: String
+  loanId: BigInt
+  loanId_not: BigInt
+  loanId_in: [BigInt]
+  loanId_not_in: [BigInt]
+  loanId_gt: BigInt
+  loanId_lt: BigInt
+  loanId_gte: BigInt
+  loanId_lte: BigInt
+  amount: BigInt
+  amount_not: BigInt
+  amount_in: [BigInt]
+  amount_not_in: [BigInt]
+  amount_gt: BigInt
+  amount_lt: BigInt
+  amount_gte: BigInt
+  amount_lte: BigInt
+  timestamp: BigInt
+  timestamp_not: BigInt
+  timestamp_in: [BigInt]
+  timestamp_not_in: [BigInt]
+  timestamp_gt: BigInt
+  timestamp_lt: BigInt
+  timestamp_gte: BigInt
+  timestamp_lte: BigInt
+  txHash: String
+  txHash_not: String
+  txHash_in: [String]
+  txHash_not_in: [String]
+  txHash_contains: String
+  txHash_not_contains: String
+  txHash_starts_with: String
+  txHash_ends_with: String
+  txHash_not_starts_with: String
+  txHash_not_ends_with: String
 }

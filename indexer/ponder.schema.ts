@@ -112,3 +112,22 @@ export const lender = onchainTable("lender", (t) => ({
   withdrawn: t.bigint().notNull().default(0n),
   updatedAt: t.bigint().notNull(),
 }));
+
+// One row per thing a wallet did or had done to its loans, for the app's History page.
+// kind: loan_opened | borrowed | repaid | harvest | loan_closed | liquidation_started |
+//       auction_bought | deposit | withdraw | withdraw_queued
+export const activity = onchainTable(
+  "activity",
+  (t) => ({
+    id: t.text().primaryKey(), // `${txHash}-${logIndex}`
+    account: t.hex().notNull(), // the wallet this entry belongs to (borrower or lender)
+    kind: t.text().notNull(),
+    loanId: t.bigint(),
+    amount: t.bigint(),
+    timestamp: t.bigint().notNull(),
+    txHash: t.hex().notNull(),
+  }),
+  (table) => ({
+    accountIdx: index().on(table.account),
+  }),
+);

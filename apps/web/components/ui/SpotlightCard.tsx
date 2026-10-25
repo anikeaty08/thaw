@@ -29,8 +29,11 @@ export function SpotlightCard({
 
       const canTilt = tilt && !prefersReducedMotion();
       if (canTilt) gsap.set(el, { transformPerspective: 900 });
-      const rotateX = gsap.quickTo(el, "rotateX", { duration: 0.6, ease: "power3" });
-      const rotateY = gsap.quickTo(el, "rotateY", { duration: 0.6, ease: "power3" });
+      // quickTo can't retarget a single part of a CSS transform, so ease a plain object and apply it.
+      const tiltState = { x: 0, y: 0 };
+      const apply = () => gsap.set(el, { rotateX: tiltState.x, rotateY: tiltState.y });
+      const rotateX = gsap.quickTo(tiltState, "x", { duration: 0.6, ease: "power3", onUpdate: apply });
+      const rotateY = gsap.quickTo(tiltState, "y", { duration: 0.6, ease: "power3", onUpdate: apply });
 
       const move = (e: PointerEvent) => {
         const r = el.getBoundingClientRect();

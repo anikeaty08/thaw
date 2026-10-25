@@ -45,8 +45,10 @@ jobs:
           REGISTRY: ${{ steps.ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          jq --arg image "$REGISTRY/thaw-indexer:$IMAGE_TAG" \
-            '.containerDefinitions[0].image = $image' \
+          # A fresh schema per release: Ponder won't start on one a different build wrote.
+          jq --arg image "$REGISTRY/thaw-indexer:$IMAGE_TAG" --arg schema "thaw_${IMAGE_TAG:0:7}" \
+            '.containerDefinitions[0].image = $image
+             | .containerDefinitions[0].environment += [{"name": "DATABASE_SCHEMA", "value": $schema}]' \
             infra/ecs/thaw-indexer-task.json > task-definition.json
           TASK_DEF_ARN=$(aws ecs register-task-definition \
             --cli-input-json file://task-definition.json \

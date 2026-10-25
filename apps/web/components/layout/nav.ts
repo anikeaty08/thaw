@@ -4,7 +4,7 @@ export const NAV: { href: string; label: string; icon: IconName; blurb: string }
   { href: "/portfolio", label: "Portfolio", icon: "wallet", blurb: "Your loans and locks" },
   { href: "/lend", label: "Lend", icon: "coins", blurb: "Earn on MUSD" },
   { href: "/auctions", label: "Auctions", icon: "gavel", blurb: "Buy defaulted veNFTs" },
-  { href: "/docs", label: "Docs", icon: "document", blurb: "How it works, contracts" },
+  { href: "/recent", label: "Recent", icon: "clock", blurb: "Your transactions" },
 ];
 
 export function isActive(pathname: string | null, href: string): boolean {

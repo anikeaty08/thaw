@@ -118,3 +118,25 @@ export async function fetchLender(address: string): Promise<LenderRow | null> {
   );
   return data.lender;
 }
+
+export interface ActivityRow {
+  id: string;
+  kind: string;
+  loanId: string | null;
+  amount: string | null;
+  timestamp: string;
+  txHash: string;
+}
+
+/** Everything a wallet did, or had done to its loans, newest first (the app's Recent page). */
+export async function fetchActivity(address: string, limit = 100): Promise<ActivityRow[]> {
+  const data = await query<{ activitys: { items: ActivityRow[] } }>(
+    `query Activity($account: String!, $limit: Int!) {
+      activitys(where: { account: $account }, limit: $limit, orderBy: "timestamp", orderDirection: "desc") {
+        items { id kind loanId amount timestamp txHash }
+      }
+    }`,
+    { account: address.toLowerCase(), limit },
+  );
+  return data.activitys.items;
+}
