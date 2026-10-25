@@ -8,6 +8,10 @@ WORKDIR /app
 RUN wget -q -O /rds-ca-bundle.pem https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
 ENV NODE_EXTRA_CA_CERTS=/rds-ca-bundle.pem
 
+# Fargate tasks here have a public IPv4 address only. Prefer IPv4 for DNS answers so a connection
+# to api.telegram.org isn't attempted over IPv6 first and left to time out.
+ENV NODE_OPTIONS="--dns-result-order=ipv4first"
+
 COPY package.json package-lock.json ./
 RUN npm ci
 

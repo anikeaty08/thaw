@@ -1,6 +1,6 @@
 import { Api } from "grammy";
 import { formatUnits } from "viem";
-import { config } from "./config.js";
+import { config, redact } from "./config.js";
 import { allLinkedChats } from "./store.js";
 import { fetchLoansForBorrower } from "./graphql.js";
 import { readHealthFactor } from "./chain.js";
@@ -24,7 +24,7 @@ export async function sendEpochReports(): Promise<void> {
       });
       await api.sendMessage(chatId, `Epoch report\n${lines.join("\n")}`);
     } catch (err) {
-      console.error(`[bot] epoch report failed for chat ${chatId}:`, err);
+      console.error(`[bot] epoch report failed for chat ${chatId}:`, redact(err));
     }
   }
 }
@@ -47,7 +47,7 @@ export async function sendLiquidationWarnings(): Promise<void> {
         }
       }
     } catch (err) {
-      console.error(`[bot] liquidation warning failed for chat ${chatId}:`, err);
+      console.error(`[bot] liquidation warning failed for chat ${chatId}:`, redact(err));
     }
   }
 }
@@ -66,7 +66,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       process.exit(0);
     })
     .catch((err) => {
-      console.error(`[bot:notify] ${job} failed:`, err);
+      console.error(`[bot:notify] ${job} failed:`, redact(err));
       process.exit(1);
     });
 }

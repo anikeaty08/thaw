@@ -1,5 +1,5 @@
 import { Bot } from "grammy";
-import { config } from "./config.js";
+import { config, redact } from "./config.js";
 import { registerCommands } from "./commands.js";
 
 /// Shared bot construction for both run modes: index.ts calls bot.start() for local dev / a
@@ -13,7 +13,7 @@ export function createBot(): Bot {
   });
   registerCommands(bot);
   bot.catch(async (err) => {
-    console.error("[bot] handler error:", err.error);
+    console.error("[bot] handler error:", redact(err.error));
     await err.ctx.reply("Something went wrong on our side. Please try again in a minute.").catch(() => {});
   });
   return bot;

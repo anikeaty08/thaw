@@ -1,5 +1,5 @@
 import cron from "node-cron";
-import { config } from "./config.js";
+import { config, redact } from "./config.js";
 import { createBot } from "./bot.js";
 import { sendEpochReports, sendLiquidationWarnings } from "./notify.js";
 
@@ -10,12 +10,12 @@ import { sendEpochReports, sendLiquidationWarnings } from "./notify.js";
 const bot = createBot();
 
 cron.schedule(config.epochReportCron, () => {
-  sendEpochReports().catch((err) => console.error("[bot] epoch report job crashed:", err));
+  sendEpochReports().catch((err) => console.error("[bot] epoch report job crashed:", redact(err)));
 });
 
 // More frequent than the epoch report: health can deteriorate any time a price moves.
 cron.schedule("*/15 * * * *", () => {
-  sendLiquidationWarnings().catch((err) => console.error("[bot] liquidation warning job crashed:", err));
+  sendLiquidationWarnings().catch((err) => console.error("[bot] liquidation warning job crashed:", redact(err)));
 });
 
 // Exit on a startup failure (bad token, no route to Telegram, another poller on the same token) so
@@ -32,6 +32,6 @@ async function main(): Promise<void> {
 }
 
 main().catch((err) => {
-  console.error("[bot] stopped:", err);
+  console.error("[bot] stopped:", redact(err));
   process.exit(1);
 });
