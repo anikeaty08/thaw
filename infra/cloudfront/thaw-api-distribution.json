@@ -1,0 +1,41 @@
+{
+  "CallerReference": "thaw-api-20261025-1",
+  "Comment": "Thaw indexer HTTPS API",
+  "Enabled": true,
+  "Origins": {
+    "Quantity": 1,
+    "Items": [
+      {
+        "Id": "thaw-alb",
+        "DomainName": "thaw-indexer-454763283.ap-southeast-2.elb.amazonaws.com",
+        "CustomOriginConfig": {
+          "HTTPPort": 80,
+          "HTTPSPort": 443,
+          "OriginProtocolPolicy": "http-only"
+        }
+      }
+    ]
+  },
+  "DefaultCacheBehavior": {
+    "TargetOriginId": "thaw-alb",
+    "ViewerProtocolPolicy": "redirect-to-https",
+    "AllowedMethods": {
+      "Quantity": 7,
+      "Items": ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"],
+      "CachedMethods": {
+        "Quantity": 2,
+        "Items": ["GET", "HEAD"]
+      }
+    },
+    "ForwardedValues": {
+      "QueryString": true,
+      "Cookies": {"Forward": "all"},
+      "Headers": {"Quantity": 1, "Items": ["*"]}
+    },
+    "MinTTL": 0,
+    "DefaultTTL": 0,
+    "MaxTTL": 0
+  },
+  "PriceClass": "PriceClass_100",
+  "ViewerCertificate": {"CloudFrontDefaultCertificate": true}
+}
