@@ -105,6 +105,36 @@ docs/                System design and README assets
 
 **Mezo primitives used:** MUSD · MEZO · veMEZO · veBTC · Voter and gauges · bribe and fee rewards · Router and Pools · MUSD Savings Rate.
 
+## Roadmap
+
+![Roadmap](docs/assets/design/6-roadmap.webp)
+
+**Phase 1: live on testnet ✓**
+- Advance and Credit Line loans against veNFTs
+- tMUSD vault (ERC-4626) with instant and queued withdrawals
+- Thursday auto-harvest keeper and a 10-minute liquidation sweep
+- Dutch auction liquidator with a reserve-fund backstop
+- Indexer on AWS with a per-wallet activity feed
+- Web app with wallet gate, Recent, docs and a testnet faucet; Telegram bot
+
+**Phase 2: make it real and safe**
+- Live veMEZO and veBTC adapters on Mezo's voter, router and oracles
+- External audit and a bug bounty
+- Keeper runs the reserve buyout automatically
+- WalletConnect and phone wallets
+- Alerts for health, harvests and auctions (Telegram and browser push)
+- Compound mode: surplus rewards re-lock MEZO automatically
+- Oracle hardening: TWAP fallback and an MUSD depeg circuit breaker
+
+**Phase 3: mainnet and growth**
+- Mezo mainnet launch
+- Liquidated locks listed on Mezo's official veNFT marketplace
+- tMUSD as collateral and liquidity across Mezo DeFi
+- Refinancing and loan transfers through the PositionNFT
+- Senior and junior vault tranches
+- Cross-chain borrowing on Base
+- Governance over risk parameters and a public risk dashboard
+
 ## Run it locally
 
 ```bash
