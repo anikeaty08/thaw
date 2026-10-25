@@ -18,11 +18,20 @@ cron.schedule("*/15 * * * *", () => {
   sendLiquidationWarnings().catch((err) => console.error("[bot] liquidation warning job crashed:", err));
 });
 
-// Exit on a startup failure (bad token, another poller on the same token) so ECS restarts the task
-// and the failure shows up in the logs instead of leaving a bot that silently receives nothing.
-bot
-  .start({ onStart: (me) => console.log(`[bot] @${me.username} is polling for updates (long-polling mode)`) })
-  .catch((err) => {
-    console.error("[bot] polling stopped:", err);
-    process.exit(1);
-  });
+// Exit on a startup failure (bad token, no route to Telegram, another poller on the same token) so
+// ECS restarts the task and the cause shows up in the logs instead of a bot that silently receives
+// nothing. The first call to Telegram gets a time limit so a hang is reported rather than waited on.
+async function main(): Promise<void> {
+  console.log("[bot] starting");
+  const me = await Promise.race([
+    bot.api.getMe(),
+    new Promise<never>((_, reject) => setTimeout(() => reject(new Error("no answer from Telegram within 20s")), 20_000)),
+  ]);
+  console.log(`[bot] connected to Telegram as @${me.username}`);
+  await bot.start({ onStart: () => console.log("[bot] polling for updates") });
+}
+
+main().catch((err) => {
+  console.error("[bot] stopped:", err);
+  process.exit(1);
+});
