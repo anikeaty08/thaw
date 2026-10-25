@@ -10,7 +10,11 @@ function required(name: string): string {
 /// Error text from Telegram requests contains the request URL, which contains the bot token. Run
 /// anything that might include one through this before logging it.
 export function redact(value: unknown): string {
-  const text = value instanceof Error ? `${value.name}: ${value.message}` : String(value);
+  let text = value instanceof Error ? `${value.name}: ${value.message}` : String(value);
+  // grammY wraps network failures in an HttpError; the real reason (ETIMEDOUT, ECONNREFUSED, …) is
+  // on the wrapped error, so include its code and message.
+  const inner = (value as { error?: { code?: string; errno?: string; message?: string } } | null)?.error;
+  if (inner && typeof inner === "object") text += ` [${inner.code ?? inner.errno ?? "?"}] ${inner.message ?? ""}`;
   const token = process.env.TELEGRAM_BOT_TOKEN;
   return (token ? text.split(token).join("<bot-token>") : text).replace(/bot\d+:[\w-]+/g, "bot<bot-token>");
 }
