@@ -1,0 +1,21 @@
+{
+  "chainId": 31611,
+  "rpcUrl": "https://rpc.test.mezo.org",
+  "startBlock": 16356305,
+  "contracts": {
+    "musd": "0x49c4540A6c542568DeaA2fEFa3107459217d4F78",
+    "escrow": "0x3dF1BBEa7781aaeD1A727801af8021AfA317f822",
+    "positionNft": "0x85804bF5e49D381449F8F85211f16B8B771C81c5",
+    "riskEngine": "0x199c55A116251240D82f87D33b8A9fe936871Cd5",
+    "vault": "0x59DFe06919e1d9D2F9d1d35D2Eb1d5E5d01785C8",
+    "oracleRouter": "0xFB4312DF271114F182B8d168Bc6965A41aa8fAdE",
+    "strategyRegistry": "0xd3cF48Cd528dE8937d510F7c0cB4a675c8d06F49",
+    "reserveFund": "0x8fcf7928d9ED6277807523Db6791691232be21Ed",
+    "loanManager": "0xfDd14a3be9A3D8ca2c9e24b7E41F8406EA5D3ac3",
+    "harvester": "0xcB506EE67dc7968507adcF69D84e1BA8Aadb64b8",
+    "liquidator": "0xF7D8AF14Ff39Ae2e27C945327cb04Eb9Dbb99BA0",
+    "mockVe": "0x0C2f0F39bc26224D409398B6c4334672b4d39BF4",
+    "mockAdapter": "0xBdFB324eE9306e73A77D8cC59803cbA7C10D6B0F",
+    "faucet": "0x6C6468c024c5586ef4A2Bb7Db0A827b9E1Ce369a"
+  }
+}
