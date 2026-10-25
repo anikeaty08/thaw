@@ -22,6 +22,7 @@ import { ThawFaucet } from "../src/testnet/ThawFaucet.sol";
 import { IRouter } from "../src/interfaces/IRouter.sol";
 import { CollateralConfig, Mode } from "../src/interfaces/ILoanManager.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { IPriceFeed } from "../src/interfaces/IPriceFeed.sol";
 
 /// @title Deploy
 /// @notice Deploys the full Thaw stack. Reads addresses from env vars so the same script targets
@@ -33,7 +34,8 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 ///           VEBTC_ADDRESS      - real veBTC VotingEscrow (testnet) or unset to skip VeBTCAdapter
 ///           VEBTC_VOTER        - real veBTC Voter (testnet) or unset
 ///           ROUTER_ADDRESS     - Mezo Pools Router, or unset to skip Harvester swap wiring
-///           BTC_USD_FEED       - Chainlink-style BTC/USD feed, or unset
+///           BTC_PRICE_TOKEN    - token address used as the key for the BTC/USD oracle config
+///           BTC_USD_FEED       - Chainlink-style BTC/USD feed (required with real veBTC)
 ///
 ///         Run: forge script script/Deploy.s.sol --rpc-url mezo_testnet --broadcast --verify
 contract Deploy is Script {
@@ -45,7 +47,21 @@ contract Deploy is Script {
         address veBTC = vm.envOr("VEBTC_ADDRESS", address(0));
         address veBTCVoter = vm.envOr("VEBTC_VOTER", address(0));
         address router = vm.envOr("ROUTER_ADDRESS", address(0));
+        address btcPriceToken = vm.envOr("BTC_PRICE_TOKEN", address(0));
         address btcUsdFeed = vm.envOr("BTC_USD_FEED", address(0));
+
+        bool deployVeBTCAdapter = veBTC != address(0) && veBTCVoter != address(0);
+        require(
+            !deployVeBTCAdapter || (btcPriceToken != address(0) && btcUsdFeed.code.length > 0),
+            "BTC_PRICE_TOKEN and BTC_USD_FEED required for veBTC"
+        );
+        if (deployVeBTCAdapter) {
+            IPriceFeed btcFeed = IPriceFeed(btcUsdFeed);
+            require(btcFeed.decimals() <= 18, "BTC/USD feed decimals must be <= 18");
+            (, int256 answer,, uint256 updatedAt,) = btcFeed.latestRoundData();
+            require(answer > 0 && updatedAt <= block.timestamp, "BTC/USD feed has invalid latest round");
+            require(block.timestamp - updatedAt <= 1 hours, "BTC/USD feed is stale");
+        }
 
         vm.startBroadcast(deployerKey);
 
@@ -93,9 +109,16 @@ contract Deploy is Script {
         reserveFund.setLiquidator(address(liquidator));
 
         // --- veBTC adapter (real, if addresses were supplied; §19 Day 18) ---
-        if (veBTC != address(0) && veBTCVoter != address(0)) {
+        if (deployVeBTCAdapter) {
+            // VeBTCAdapter queries OracleRouter by the BTC asset token, not by the feed address.
+            // Use the documented BTC/USD freshness and deviation bounds. No fallback route is
+            // configured here because the router may be absent; a stale primary fails closed.
+            IRouter.Route[] memory noFallback = new IRouter.Route[](0);
+            oracleRouter.configureFeed(btcPriceToken, btcUsdFeed, 1 hours, 500, noFallback);
             VeBTCAdapter veBTCAdapter =
-                new VeBTCAdapter(deployer, veBTC, address(escrow), veBTCVoter, address(oracleRouter), btcUsdFeed);
+                new VeBTCAdapter(
+                    deployer, veBTC, address(escrow), veBTCVoter, address(oracleRouter), btcPriceToken
+                );
             escrow.setAdapter(address(veBTCAdapter), true);
             escrow.setAllowedTarget(veBTCVoter, true);
             veBTCAdapter.setHarvester(address(harvester));

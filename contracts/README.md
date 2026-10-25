@@ -27,7 +27,9 @@ test/
 script/
   Deploy.s.sol        Deploys the full stack; reads MUSD_ADDRESS/VEBTC_ADDRESS/VEBTC_VOTER/etc. from
                       env so the same script targets Anvil (all mocked) or Mezo testnet (real MUSD +
-                      veBTC + Voter + Router). Always deploys MockVeAdapter too, as the demo fallback (§23).
+                      veBTC + Voter + Router). Real veBTC also requires a nonzero BTC_PRICE_TOKEN
+                      oracle key and a deployed BTC_USD_FEED, and wires that feed into OracleRouter.
+                      Always deploys MockVeAdapter too, as the demo fallback (§23).
 ```
 
 ## What's implemented
@@ -64,7 +66,7 @@ script/
 ## Testing
 
 ```bash
-forge test                          # 31 tests across 7 suites (30 unit/integration + 1 invariant)
+forge test                          # 36 tests across 8 suites (34 unit/integration + 2 invariants)
 forge coverage --ir-minimum --report summary
 forge fmt --check
 ```

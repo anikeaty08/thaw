@@ -25,7 +25,11 @@ cd contracts
 PRIVATE_KEY=0x... forge script script/Deploy.s.sol --rpc-url mezo_testnet --broadcast
 ```
 
-Note every address it prints — you'll paste them into Render, Vercel and GitHub below.
+For a real veBTC deployment, supply `VEBTC_ADDRESS`, `VEBTC_VOTER`, `BTC_PRICE_TOKEN`, and
+`BTC_USD_FEED`; the deploy script checks the BTC/USD feed before broadcasting. Use a fresh deployer
+key kept outside the repository. Note every address it prints — you'll paste them into Render,
+Vercel and GitHub below. Record the first contract deployment block from
+`contracts/broadcast/Deploy.s.sol/31611/run-latest.json` for the indexer's `START_BLOCK`.
 
 ## 2. Supabase (database)
 
@@ -65,7 +69,8 @@ the build, so set them *before* the first deploy):
 
 - `NEXT_PUBLIC_RPC_URL`, `NEXT_PUBLIC_CHAIN_ID` — `https://rpc.test.mezo.org` / `31611`
 - `NEXT_PUBLIC_INDEXER_URL` — the Render URL from step 3
-- `NEXT_PUBLIC_*_ADDRESS` (8 of them) — from your deploy output
+- `NEXT_PUBLIC_*_ADDRESS` (10 of them) — from your deploy output; follow every entry in
+  `apps/web/.env.example`
 - `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` — from [cloud.reown.com](https://cloud.reown.com)
 
 The top bar's connection pill (`components/ui/BackendStatus.tsx`) pings the indexer's `/ready` as

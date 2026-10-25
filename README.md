@@ -53,8 +53,7 @@ cd apps/bot && npm install && npm start
 
 ## Status
 
-🛠️ Backend implemented against the Wave 1 + Wave 2 design: full Solidity core (Advance + Credit Line,
-Dutch-auction liquidation, tMUSD vault, adapters), 31 passing Foundry tests (unit + integration +
-invariant), and the keeper/optimizer/indexer/bot services. Not yet deployed to Mezo testnet (chain ID
-31611) — real veMEZO/veBTC/Voter/Router addresses from §6.2/§22 still need to be wired into
-`script/Deploy.s.sol`. Frontend (`apps/web`) not built.
+🛠️ Contracts, keeper, optimizer, indexer, Telegram bot, and Next.js frontend are implemented.
+The Solidity suite has 36 passing unit, integration, and invariant tests. Thaw is not yet deployed
+to Mezo testnet (chain ID 31611); real collateral, voter, router, and oracle addresses must be
+supplied to `script/Deploy.s.sol` before deploying the real veBTC path.

@@ -8,7 +8,7 @@ import { Wordmark } from "@/components/ui/ThawMark";
 import { NextHarvest } from "@/components/ui/NextHarvest";
 import { MeltSimulator } from "@/components/landing/MeltSimulator";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
-import { useVaultOverview } from "@/lib/hooks";
+import { isConfigured, useVaultOverview } from "@/lib/hooks";
 import { formatMusd } from "@/lib/format";
 import { addresses } from "@/lib/contracts";
 
@@ -32,17 +32,17 @@ export default function LandingPage() {
         <div className="relative mx-auto grid max-w-7xl gap-14 px-4 pb-20 pt-14 sm:px-6 sm:pt-20 lg:grid-cols-12 lg:items-center lg:px-8 lg:pb-28 lg:pt-24">
           <div className="lg:col-span-6">
             <a
-              href={`https://explorer.test.mezo.org/address/${LOAN_MANAGER}`}
-              target="_blank"
-              rel="noreferrer"
+              href={isConfigured ? `https://explorer.test.mezo.org/address/${LOAN_MANAGER}` : undefined}
+              target={isConfigured ? "_blank" : undefined}
+              rel={isConfigured ? "noreferrer" : undefined}
               className="inline-flex items-center gap-2 rounded-full border border-glacier-700 bg-glacier-900 px-3 py-1.5 text-xs text-mist-300 transition-colors hover:border-glacier-600 hover:text-frostwhite"
             >
               <span className="relative flex h-2 w-2" aria-hidden>
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-50" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
+                {isConfigured && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-50" />}
+                <span className={clsx("relative inline-flex h-2 w-2 rounded-full", isConfigured ? "bg-success" : "bg-mist-500")} />
               </span>
-              Live on Mezo testnet
-              <Icon name="external" size={12} className="text-mist-500" />
+              {isConfigured ? "Live on Mezo testnet" : "Testnet deployment pending"}
+              {isConfigured && <Icon name="external" size={12} className="text-mist-500" />}
             </a>
             <h1 className="display animate-thaw mt-7 text-[clamp(2.9rem,5.4vw,5rem)] leading-[0.94]">
               Your locks earn.
@@ -197,7 +197,7 @@ export default function LandingPage() {
           <div>
             <Wordmark size={22} />
             <p className="mt-3 max-w-sm text-sm leading-relaxed text-mist-500">
-              Self-repaying MUSD credit for locked Mezo positions. Running on Mezo testnet, chain 31611.
+              Self-repaying MUSD credit for locked Mezo positions. {isConfigured ? "Running" : "Planned"} on Mezo testnet, chain 31611.
             </p>
           </div>
           <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-mist-400">
