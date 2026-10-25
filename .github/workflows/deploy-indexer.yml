@@ -53,5 +53,6 @@ jobs:
             --query 'taskDefinition.taskDefinitionArn' --output text)
           aws ecs update-service --cluster kishan-saathi-cluster --service thaw-indexer \
             --task-definition "$TASK_DEF_ARN" --force-new-deployment \
-            --deployment-configuration "minimumHealthyPercent=0,maximumPercent=100"
+            --deployment-configuration "minimumHealthyPercent=0,maximumPercent=100" \
+            --availability-zone-rebalancing DISABLED
           aws ecs wait services-stable --cluster kishan-saathi-cluster --services thaw-indexer
