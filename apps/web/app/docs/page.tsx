@@ -122,8 +122,9 @@ export default function DocsPage() {
 
             <DocSection id="lending" title="Lending MUSD">
               <p>
-                Lenders deposit MUSD into <strong>tMUSD</strong>, an ERC-4626 vault. Yield comes from loan interest, a share of
-                harvested rewards, and idle MUSD parked in the MUSD Savings Rate.
+                Lenders deposit MUSD into <strong>tMUSD</strong>, an ERC-4626 vault. Today the yield is loan interest, which reaches
+                the vault as borrowers repay. A reserve fund, built from 10% of each harvest, covers a bad loan before lenders do.
+                Parking idle MUSD in the MUSD Savings Rate is built into the contract but not connected on testnet yet.
               </p>
               <p>
                 Withdrawals are instant up to the vault&apos;s idle liquidity. Anything beyond that queues and fills from the next

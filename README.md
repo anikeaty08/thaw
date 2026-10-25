@@ -43,11 +43,11 @@ Thaw turns a locked position into MUSD you can spend today, and repays itself ou
 
 ## For lenders
 
-Deposit MUSD into **tMUSD**, an ERC-4626 vault, and earn from three places at once:
+Deposit MUSD into **tMUSD**, an ERC-4626 vault.
 
-- **Loan interest** at a fixed APR
-- **A share of every Thursday harvest**
-- **The MUSD Savings Rate** on anything not lent out
+- **Loan interest** at a fixed APR is what pays lenders today. It reaches the vault as borrowers repay.
+- **A reserve fund**, built from 10% of every Thursday harvest, covers a bad loan before lenders take any loss.
+- **The MUSD Savings Rate** for idle MUSD is built into the vault but not connected on testnet yet, so idle MUSD earns nothing for now.
 
 Withdrawals are instant up to idle liquidity. Anything beyond that queues and fills from the next harvest, since every loan pays down weekly.
 
@@ -143,6 +143,7 @@ docs/                System design and README assets
 - Live veMEZO and veBTC adapters on Mezo's voter, router and oracles
 - External audit and a bug bounty
 - Keeper runs the reserve buyout automatically
+- Connect the vault to the MUSD Savings Rate so idle MUSD earns
 - WalletConnect and phone wallets
 - Alerts for health, harvests and auctions (Telegram and browser push)
 - Compound mode: surplus rewards re-lock MEZO automatically

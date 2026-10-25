@@ -138,7 +138,7 @@ function swapExactTokensForTokens(uint256 amountIn, uint256 amountOutMin, Route[
 | **Adapters** (`IVeAdapter`) | Normalise each ve system: vote, claim, collateral value, release |
 | **Harvester** | Weekly pipeline: claim → swap → split → repay → re-vote |
 | **StrategyRegistry** | The vote strategy keepers are allowed to execute |
-| **TMUSDVault** | ERC-4626 lender vault; lends to LoanManager, parks idle MUSD in the Savings Rate |
+| **TMUSDVault** | ERC-4626 lender vault; lends to LoanManager, can park idle MUSD in the Savings Rate once `msr` is set |
 | **DutchAuctionLiquidator** | 24-hour falling-price sale of a defaulted lock |
 | **ReserveFund** | Protocol fees and penalties; first-loss backstop |
 
@@ -292,7 +292,7 @@ proceeds   = debt → vault; 2% penalty → ReserveFund; remainder → borrower
 ## 9. Lender vault (tMUSD)
 
 - ERC-4626 over MUSD, so tMUSD is composable.
-- **Yield:** loan interest, a share of harvests, and idle MUSD in the MUSD Savings Rate.
+- **Yield today:** loan interest, which reaches the vault as borrowers repay. The 10% protocol fee on each harvest goes to the ReserveFund, which covers bad debt before lenders. Idle MUSD can be parked in the MUSD Savings Rate, but the vault's `msr` is not set on the testnet deployment, so idle MUSD earns nothing there yet.
 - **Withdrawals:** instant up to idle liquidity; beyond that an ERC-7540-style queue filled from harvest inflows, which works because loans amortise weekly.
 - **Accounting:** `totalAssets = idle + deployedInMSR + Σ debt − badDebtProvision`.
 - **Inflation attack:** OpenZeppelin decimals offset plus a seed deposit.
@@ -424,5 +424,5 @@ Harvest repayments and manual repayments emit the same `Repaid` event; the index
 ![Roadmap](assets/design/6-roadmap.webp)
 
 - **Phase 1, live on testnet:** both loan modes, the vault, the Thursday keeper, Dutch auctions with a reserve, the indexer on AWS with a per-wallet activity feed, the web app and the Telegram bot.
-- **Phase 2, make it real and safe:** live veMEZO and veBTC adapters, an external audit and bug bounty, keeper-run reserve buyouts, WalletConnect and phone wallets, alerts, compound mode (surplus re-locks MEZO), oracle hardening.
+- **Phase 2, make it real and safe:** live veMEZO and veBTC adapters, an external audit and bug bounty, keeper-run reserve buyouts, connecting the vault to the MUSD Savings Rate, WalletConnect and phone wallets, alerts, compound mode (surplus re-locks MEZO), oracle hardening.
 - **Phase 3, mainnet and growth:** mainnet launch, liquidated locks listed on Mezo's veNFT marketplace, tMUSD as collateral and liquidity across Mezo DeFi, refinancing and loan transfers through the PositionNFT, senior and junior vault tranches, cross-chain borrowing on Base, and governance over risk parameters.

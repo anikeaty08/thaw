@@ -408,8 +408,8 @@ const MODES: {
 
 const YIELD: { icon: IconName; title: string; body: string }[] = [
   { icon: "coins", title: "Loan interest", body: "Borrowers pay a fixed 5–6% APR on what they owe." },
-  { icon: "drop", title: "A share of every harvest", body: "Part of each Thursday's claimed rewards goes to lenders." },
-  { icon: "lock", title: "Savings Rate on idle MUSD", body: "Whatever isn't lent out still earns the MUSD Savings Rate." },
+  { icon: "shield", title: "A reserve that protects you", body: "10% of every Thursday harvest builds a reserve fund that covers a bad loan before lenders do." },
+  { icon: "lock", title: "Savings Rate on idle MUSD, soon", body: "MUSD that isn't lent out waits in the vault. It will earn the MUSD Savings Rate once that is connected." },
 ];
 
 const PRINCIPLES: { icon: IconName; title: string; body: string; link?: { href: string; label: string } }[] = [

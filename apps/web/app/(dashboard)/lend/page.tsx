@@ -131,7 +131,7 @@ export default function LendPage() {
           value={formatMusd(idle, { compact: true })}
           unit="MUSD"
           tone="neutral"
-          hint="Idle MUSD you can withdraw instantly. It earns the MUSD Savings Rate while it waits."
+          hint="Idle MUSD you can withdraw instantly. It earns nothing while it waits: the MUSD Savings Rate isn't connected on testnet yet."
         />
         <StatTile
           icon="shield"
@@ -252,13 +252,16 @@ export default function LendPage() {
           </h2>
           <ul className="mt-5 space-y-5">
             <YieldSource icon="coins" title="Loan interest">
-              Borrowers pay a fixed APR on what they owe, straight into the vault.
+              Borrowers pay a fixed APR on what they owe. It reaches the vault as they repay, so it is small at first and grows
+              as loans age. This is the only thing that earns you MUSD today.
             </YieldSource>
-            <YieldSource icon="drop" title="A share of every harvest">
-              Part of each Thursday's claimed bribes and fees goes to lenders, not just the borrower's debt.
+            <YieldSource icon="shield" title="A reserve that protects you">
+              10% of every Thursday harvest goes to a reserve fund. If a loan goes bad, the reserve covers it before lenders
+              take any loss. It protects your deposit; it doesn't pay you.
             </YieldSource>
-            <YieldSource icon="shield" title="Savings Rate on idle MUSD">
-              Whatever isn't lent out sits in the MUSD Savings Rate, so nothing is ever sitting still.
+            <YieldSource icon="drop" title="Idle MUSD earns nothing yet">
+              What isn't lent out waits in the vault, ready to withdraw. It will earn the MUSD Savings Rate once that is
+              connected. It isn't on testnet yet.
             </YieldSource>
           </ul>
         </section>
