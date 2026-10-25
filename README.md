@@ -140,7 +140,7 @@ docs/                System design and README assets
 - Web app with wallet gate, Recent, docs and a testnet faucet; Telegram bot
 
 **Phase 2: make it real and safe**
-- Live veMEZO and veBTC adapters on Mezo's voter, router and oracles
+- Live veMEZO and veBTC adapters on Mezo's voter, router and oracles, so real locks replace the faucet's test locks
 - External audit and a bug bounty
 - Keeper runs the reserve buyout automatically
 - Connect the vault to the MUSD Savings Rate so idle MUSD earns
@@ -148,9 +148,9 @@ docs/                System design and README assets
 - Alerts for health, harvests and auctions (Telegram and browser push)
 - Compound mode: surplus rewards re-lock MEZO automatically
 - Oracle hardening: TWAP fallback and an MUSD depeg circuit breaker
+- Mezo mainnet launch, once the audit is done (deploys from the team's own wallet; the gas cost is small)
 
-**Phase 3: mainnet and growth**
-- Mezo mainnet launch
+**Phase 3: growth**
 - Liquidated locks listed on Mezo's official veNFT marketplace
 - tMUSD as collateral and liquidity across Mezo DeFi
 - Refinancing and loan transfers through the PositionNFT

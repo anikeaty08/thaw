@@ -424,5 +424,5 @@ Harvest repayments and manual repayments emit the same `Repaid` event; the index
 ![Roadmap](assets/design/6-roadmap.webp)
 
 - **Phase 1, live on testnet:** both loan modes, the vault, the Thursday keeper, Dutch auctions with a reserve, the indexer on AWS with a per-wallet activity feed, the web app and the Telegram bot.
-- **Phase 2, make it real and safe:** live veMEZO and veBTC adapters, an external audit and bug bounty, keeper-run reserve buyouts, connecting the vault to the MUSD Savings Rate, WalletConnect and phone wallets, alerts, compound mode (surplus re-locks MEZO), oracle hardening.
-- **Phase 3, mainnet and growth:** mainnet launch, liquidated locks listed on Mezo's veNFT marketplace, tMUSD as collateral and liquidity across Mezo DeFi, refinancing and loan transfers through the PositionNFT, senior and junior vault tranches, cross-chain borrowing on Base, and governance over risk parameters.
+- **Phase 2, make it real and safe:** live veMEZO and veBTC adapters, an external audit and bug bounty, keeper-run reserve buyouts, connecting the vault to the MUSD Savings Rate, WalletConnect and phone wallets, alerts, compound mode (surplus re-locks MEZO), oracle hardening, and the Mezo mainnet launch once the audit is done.
+- **Phase 3, growth:** liquidated locks listed on Mezo's veNFT marketplace, tMUSD as collateral and liquidity across Mezo DeFi, refinancing and loan transfers through the PositionNFT, senior and junior vault tranches, cross-chain borrowing on Base, and governance over risk parameters.
