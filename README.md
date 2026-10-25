@@ -87,9 +87,9 @@ Key contracts: LoanManager `0xfDd14a3be9A3D8ca2c9e24b7E41F8406EA5D3ac3` · tMUSD
 
 ## How it's built
 
-![Thaw system design: user flow, architecture, contracts, harvest, liquidation, roadmap](docs/assets/thaw-system-design.webp)
+![Thaw system architecture](docs/assets/design/2-architecture.webp)
 
-Six diagrams: user flow, system architecture, smart contracts, the Thursday harvest, liquidation and auctions, and the Phase 1–3 roadmap. Open [`docs/thaw-system-design.excalidraw`](docs/thaw-system-design.excalidraw) in [excalidraw.com](https://excalidraw.com) to edit them.
+The full [system design](docs/THAW_SYSTEM_DESIGN.md) walks through user flows, architecture, contracts, the harvest, liquidation and the roadmap, each with a diagram.
 
 ```
 contracts/           Foundry: LoanManager, ThawEscrow, RiskEngine, Harvester, TMUSDVault (ERC-4626),
