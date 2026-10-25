@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import clsx from "clsx";
 import { useAccount, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { addresses, abis, erc721Abi } from "@/lib/contracts";
-import { useMaxBorrow, isConfigured } from "@/lib/hooks";
+import { useMaxBorrow, isConfigured, MEZO_WRITE_GAS } from "@/lib/hooks";
 import { formatMusd, bpsToPercent } from "@/lib/format";
 import { Button } from "@/components/ui/Button";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
@@ -133,7 +133,7 @@ export function BorrowDrawer({ tokenId, onClose }: { tokenId: bigint; onClose: (
     resetBorrow();
     if (!alreadyApproved) {
       setStep("approving");
-      writeApprove({ address: addresses.mockVe, abi: erc721Abi, functionName: "approve", args: [addresses.escrow, tokenId] });
+      writeApprove({ address: addresses.mockVe, abi: erc721Abi, functionName: "approve", args: [addresses.escrow, tokenId], gas: MEZO_WRITE_GAS });
       return;
     }
     submitBorrow();
@@ -146,6 +146,7 @@ export function BorrowDrawer({ tokenId, onClose }: { tokenId: bigint; onClose: (
       abi: abis.loanManager,
       functionName: "openLoan",
       args: [addresses.mockAdapter, tokenId, modeIndex, amountWad, repayShareBps],
+      gas: MEZO_WRITE_GAS,
     });
   }
 

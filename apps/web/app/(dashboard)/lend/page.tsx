@@ -10,7 +10,7 @@ import { useAccount, useReadContracts, useWaitForTransactionReceipt, useWriteCon
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { formatUnits } from "viem";
 import { addresses, abis, erc20Abi } from "@/lib/contracts";
-import { isConfigured, useApproveThenWrite, useMusdBalance, useVaultOverview, useVaultShareBalance } from "@/lib/hooks";
+import { isConfigured, MEZO_WRITE_GAS, useApproveThenWrite, useMusdBalance, useVaultOverview, useVaultShareBalance } from "@/lib/hooks";
 import { formatMusd } from "@/lib/format";
 import { StatTile } from "@/components/ui/StatTile";
 import { Button } from "@/components/ui/Button";
@@ -75,14 +75,14 @@ export default function LendPage() {
     if (!address) return;
     if (kind === "now") {
       redeemLabels.current = { pending: `Withdrawing ${formatMusd(instantValue)} MUSD`, success: `Withdrew ${formatMusd(instantValue)} MUSD` };
-      writeRedeem({ address: addresses.vault, abi: abis.vault as Abi, functionName: "redeem", args: [instantShares, address, address] });
+      writeRedeem({ address: addresses.vault, abi: abis.vault as Abi, functionName: "redeem", args: [instantShares, address, address], gas: MEZO_WRITE_GAS });
     } else {
       redeemLabels.current = {
         pending: `Queueing ${formatMusd(queuedValue)} MUSD`,
         success: "Withdrawal queued",
         successBody: "It pays out from the next Thursday's harvest inflow.",
       };
-      writeRedeem({ address: addresses.vault, abi: abis.vault as Abi, functionName: "requestRedeem", args: [queuedShares, address] });
+      writeRedeem({ address: addresses.vault, abi: abis.vault as Abi, functionName: "requestRedeem", args: [queuedShares, address], gas: MEZO_WRITE_GAS });
     }
   }
   const amountNum = Number(amount || 0);

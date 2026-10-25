@@ -8,6 +8,8 @@ import { addresses, abis, erc20Abi, faucetAbi, mockVeAbi } from "./contracts";
 import type { Address } from "viem";
 
 const ZERO = "0x0000000000000000000000000000000000000000";
+// Mezo's public RPC can under-estimate EIP-7623 data gas. Users pay only gas consumed.
+export const MEZO_WRITE_GAS = 1_000_000n;
 export const isConfigured = addresses.loanManager !== ZERO;
 
 export function useLoan(loanId: bigint | undefined) {
@@ -124,7 +126,7 @@ export function useApproveThenWrite() {
     if (approveReceipt.isSuccess && pendingAction.current) {
       const action = pendingAction.current;
       pendingAction.current = null;
-      writeAction(action as any);
+      writeAction({ ...action, gas: MEZO_WRITE_GAS } as any);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [approveReceipt.isSuccess]);
@@ -134,7 +136,7 @@ export function useApproveThenWrite() {
     resetApprove();
     resetAction();
     pendingAction.current = actionCall;
-    writeApprove(approveCall as any);
+    writeApprove({ ...approveCall, gas: MEZO_WRITE_GAS } as any);
   }
 
   function reset() {
@@ -259,6 +261,6 @@ export function useFaucet(account: Address | undefined) {
     readyAt,
     isBusy: isPending || (!!hash && receipt.isPending),
     isDone: receipt.isSuccess,
-    drip: () => writeContract({ address: addresses.faucet, abi: faucetAbi, functionName: "drip" }),
+    drip: () => writeContract({ address: addresses.faucet, abi: faucetAbi, functionName: "drip", gas: MEZO_WRITE_GAS }),
   };
 }
