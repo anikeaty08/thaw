@@ -41,7 +41,7 @@
         },
         {
           "name": "TELEGRAM_BOT_TOKEN",
-          "valueFrom": "thaw/bot/telegram-token"
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-2:406169239164:secret:thaw/bot/telegram-token-xtEXVg"
         }
       ],
       "logConfiguration": {
