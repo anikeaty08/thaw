@@ -24,6 +24,7 @@ export function BorrowDrawer({ tokenId, onClose }: { tokenId: bigint; onClose: (
   const [amountWad, setAmountWad] = useState(0n);
   const [repayShareBps, setRepayShareBps] = useState(10000);
   const [step, setStep] = useState<Step>("configure");
+  const [understood, setUnderstood] = useState(false);
 
   const modeIndex = mode === "advance" ? 0 : 1;
   const maxBorrow = useMaxBorrow(addresses.mockAdapter, tokenId, modeIndex as 0 | 1);
@@ -210,6 +211,7 @@ export function BorrowDrawer({ tokenId, onClose }: { tokenId: bigint; onClose: (
                 onChange={(m) => {
                   setMode(m);
                   setAmountWad(0n);
+                  setUnderstood(false);
                 }}
               />
               <p className="mt-3 text-xs leading-relaxed text-mist-400">
@@ -266,6 +268,8 @@ export function BorrowDrawer({ tokenId, onClose }: { tokenId: bigint; onClose: (
               <Row label="Fixed APR" value="6%" />
             </div>
 
+            <BeforeYouBorrow mode={mode} tokenId={tokenId} projectedHF={projectedHF} understood={understood} onChange={setUnderstood} />
+
             {txError && (
               <div role="alert" className="mt-6 flex items-start gap-2.5 rounded-xl border border-danger/25 bg-danger/[0.06] px-4 py-3 text-sm text-mist-300">
                 <Icon name="warning" size={16} className="mt-0.5 text-danger" />
@@ -278,7 +282,7 @@ export function BorrowDrawer({ tokenId, onClose }: { tokenId: bigint; onClose: (
             )}
 
             <div className="mt-auto pt-8">
-              <Button size="lg" className="w-full" disabled={amountWad === 0n || step === "approving" || step === "borrowing"} onClick={handleSubmit}>
+              <Button size="lg" className="w-full" disabled={amountWad === 0n || !understood || step === "approving" || step === "borrowing"} onClick={handleSubmit}>
                 {step === "approving"
                   ? "Approving…"
                   : step === "borrowing"
@@ -292,6 +296,72 @@ export function BorrowDrawer({ tokenId, onClose }: { tokenId: bigint; onClose: (
         )}
       </motion.aside>
     </AnimatePresence>
+  );
+}
+
+/** What happens to the lock, and the one way a loan can end badly. Shown before the wallet prompt. */
+function BeforeYouBorrow({
+  mode,
+  tokenId,
+  projectedHF,
+  understood,
+  onChange,
+}: {
+  mode: Mode;
+  tokenId: bigint;
+  projectedHF: number | null;
+  understood: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  // Health factor is value x liquidation LTV / debt, so value can fall by 1 - 1/HF before it reaches 1.
+  const cushion = projectedHF && projectedHF > 1 ? Math.round((1 - 1 / projectedHF) * 100) : null;
+
+  return (
+    <section aria-labelledby="before-borrow" className="mt-6 rounded-xl border border-glacier-700 bg-glacier-950/50 px-4 py-4">
+      <h3 id="before-borrow" className="text-sm font-medium text-frostwhite">
+        Before you borrow
+      </h3>
+      <ul className="mt-3 space-y-2.5 text-xs leading-relaxed text-mist-400">
+        <li>
+          <span className="text-mist-200">Your lock moves into escrow.</span> Lock #{tokenId.toString()} is held by the Thaw contract while the loan is open. You
+          can't sell or vote with it, but you still own the loan position.
+        </li>
+        <li>
+          <span className="text-mist-200">Rewards repay the loan.</span> Every Thursday the lock's rewards are claimed and applied to what you owe. Repay any time
+          yourself to speed it up.
+        </li>
+        <li>
+          <span className="text-mist-200">You get the lock back when the debt reaches zero.</span> Close the loan on its page and it returns to your wallet.
+        </li>
+        {mode === "advance" ? (
+          <li>
+            <span className="text-mist-200">When can it be sold?</span> Price moves alone never trigger it. Only if{" "}
+            <b className="font-medium text-mist-200">8 Thursdays in a row</b> repay nothing (the lock stopped earning) <i>and</i> the lock is then worth too little
+            for the debt, it goes to a 24-hour auction. A repayment in any week resets the count.
+          </li>
+        ) : (
+          <li>
+            <span className="text-mist-200">When can it be sold?</span> If the lock's value falls until your health factor drops below 1.00, anyone can start a
+            24-hour auction on it.
+            {cushion !== null && (
+              <>
+                {" "}
+                At this amount, that happens if the lock loses about <b className="font-medium text-mist-200">{cushion}%</b> of its value.
+              </>
+            )}{" "}
+            Repaying early raises your health factor.
+          </li>
+        )}
+        <li>
+          <span className="text-mist-200">What an auction means.</span> The lock is sold to cover the debt plus a 2% penalty. Anything left over comes back to you.
+          Your health is always shown on the loan page, and Telegram alerts warn you before it gets close.
+        </li>
+      </ul>
+      <label className="mt-4 flex min-h-11 cursor-pointer items-start gap-3 text-xs text-mist-300">
+        <input type="checkbox" checked={understood} onChange={(e) => onChange(e.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-frost-300" />
+        <span>I understand my lock is held in escrow and can be sold at auction in the case above.</span>
+      </label>
+    </section>
   );
 }
 
