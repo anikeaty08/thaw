@@ -11,8 +11,7 @@ Everything here runs on free tiers. Nothing needs a credit card except Supabase 
 | Indexer (`indexer`) — GraphQL API the frontend reads | **Render**, free Web Service | Needs to be a running server (syncs the chain continuously), but Render's free tier sleeps after ~15 idle minutes and wakes on the next request in 30-60s. The frontend's `BackendStatus` pill (top bar) pings it on every page load specifically to trigger that wake-up, and shows "Waking up…" while it happens. |
 | Postgres (indexer's data + the bot's chat links) | **Supabase**, free project | One database, two schemas: the indexer's tables live under schema `thaw`; the bot's `bot_links` table lives under the default `public` schema. No collision. |
 | Keeper (`services/keeper`) — weekly harvest + liquidation sweep | **GitHub Actions**, scheduled workflow | It only needs to *wake up* on a schedule, not run continuously. Render only offers that for money (a paid "Background Worker"); GitHub Actions cron is free on a public repo. See `.github/workflows/keeper.yml`. |
-| Telegram bot (`apps/bot`) — commands | **Vercel**, as its own small serverless-function project | Rewritten from long-polling (which needs a resident process) to a webhook: Telegram POSTs to us instead of us asking it for updates, so it fits a stateless function. See `apps/bot/api/webhook.ts`. |
-| Telegram bot — epoch reports & liquidation warnings | **GitHub Actions**, scheduled workflow | Same reasoning as the keeper: these used to be an in-process cron inside the long-polling bot; now `.github/workflows/bot-notify.yml` fires them instead. |
+| Telegram bot (`apps/bot`) — commands, epoch reports and liquidation warnings | **AWS ECS Fargate** (`thaw-bot`), same cluster and network as the indexer | One small always-on task. It long-polls Telegram and runs its own alert schedule, and it needs to sit inside AWS because the chat-to-wallet links live in the indexer's **private** RDS database, which GitHub and Vercel cannot reach. |
 
 If you'd rather pay for simplicity, every GitHub Actions job here can be a Render Background Worker
 instead — same code, just run `npm start` (keeper) or keep the old polling `apps/bot` `npm start`
@@ -77,32 +76,35 @@ The top bar's connection pill (`components/ui/BackendStatus.tsx`) pings the inde
 soon as anyone opens the site — that's the "trigger the backend on visit" behavior, and it's also
 what wakes a sleeping Render instance.
 
-## 5. Telegram bot → Vercel (webhook) + GitHub Actions (notifications)
+## 5. Telegram bot → AWS ECS
 
-**5a. Deploy the webhook.** A *second*, separate Vercel project (it's not a Next.js app): **New
-Project** → same repo → root directory `apps/bot`. Environment variables (from
-`apps/bot/.env.example`): `TELEGRAM_BOT_TOKEN`, `DATABASE_URL` (the same Supabase string from step
-2), `RPC_URL`, `CHAIN_ID`, `LOAN_MANAGER_ADDRESS`, `INDEXER_URL`, `WEBAPP_URL` (your Vercel frontend
-URL), and `TELEGRAM_WEBHOOK_SECRET` (any long random string — verifies a request really came from
-Telegram).
+The bot runs as the `thaw-bot` ECS service and is deployed by `.github/workflows/deploy-bot.yml`
+whenever `apps/bot/**` changes on `main`. It long-polls Telegram, sends the Thursday 07:00 UTC epoch
+report and checks for unhealthy loans every 15 minutes, all inside the one process
+(`apps/bot/src/index.ts`).
 
-**5b. Point Telegram at it.** One-time, from your machine, after the Vercel deploy finishes:
+**What it needs**
+
+- The bot token in AWS Secrets Manager as `thaw/bot/telegram-token` (the task reads it at start).
+- The existing database secret `thaw/rds/database`. The bot creates its own `bot_links` table in
+  that database on first use, so there is no second database.
+- The task execution role allowed to read both (`infra/iam/thaw-read-rds-secret.json`).
+- Plain settings are in `infra/ecs/thaw-bot-task.json`: `RPC_URL`, `CHAIN_ID`, `LOAN_MANAGER_ADDRESS`,
+  `INDEXER_URL`, `WEBAPP_URL`.
+
+**Check it is alive**
 
 ```bash
-cd apps/bot
-npm run set-webhook -- https://<your-bot-project>.vercel.app
+aws ecs describe-services --cluster kishan-saathi-cluster --services thaw-bot --region ap-southeast-2   --query 'services[0].{running:runningCount,desired:desiredCount}'
+aws logs tail /ecs/thaw-bot --since 30m --region ap-southeast-2
 ```
 
-**5c. Wire up notifications.** In this GitHub repo, **Settings → Secrets and variables → Actions**:
+The log should show `[bot] @<username> is polling for updates`, then one `[bot] update from chat …`
+line per message people send.
 
-- Secrets: `TELEGRAM_BOT_TOKEN`, `BOT_DATABASE_URL` (same Supabase string again), and separately
-  `KEEPER_PRIVATE_KEY` for the keeper workflow (§6). Never put these in a `vars` — they're readable
-  by anyone with read access to the repo.
-- Variables: `RPC_URL`, `CHAIN_ID`, `LOAN_MANAGER_ADDRESS`, `INDEXER_URL`, `WEBAPP_URL`, and for the
-  keeper: `HARVESTER_ADDRESS`, `DUTCH_AUCTION_LIQUIDATOR_ADDRESS`.
-
-`.github/workflows/bot-notify.yml` then sends the weekly epoch report and checks for underwater
-loans every 15 minutes, without any server of its own.
+**Only one poller per token.** Telegram hands each update to exactly one consumer. Do not run
+`npm start` locally, or a webhook, against the same bot token while the ECS task is running; they
+steal each other's updates. `npm run delete-webhook` clears a leftover webhook.
 
 ## 6. Keeper → GitHub Actions
 
@@ -111,8 +113,8 @@ little testnet BTC for gas — never reuse the contract deployer key here) and t
 `.github/workflows/keeper.yml` runs the harvest every Thursday 00:05 UTC and a liquidation health
 check every 10 minutes.
 
-Both `keeper.yml` and `bot-notify.yml` also have a manual **Run workflow** button (Actions tab) for
-testing without waiting for the schedule.
+`keeper.yml` also has a manual **Run workflow** button (Actions tab) for testing without waiting
+for the schedule.
 
 ## 7. Verify the live stack
 
@@ -143,7 +145,6 @@ the UI through the deployed indexer.
 - **Render free tier sleeps.** The first request after 15 idle minutes waits out a cold start
   (usually well under a minute). `BackendStatus` covers this in the UI; anything hitting the
   indexer directly (`curl`, the bot, the keeper) will also just see that first request take longer.
-- **Long-polling and the webhook are mutually exclusive.** Don't run `apps/bot`'s `npm start`
-  (§index.ts, long-polling) against the same bot token as the deployed webhook — Telegram delivers
-  updates one way at a time, and starting the poller will silently steal them from Vercel.
-  `npm run delete-webhook` switches back to polling if you ever need to.
+- **Polling and webhooks are mutually exclusive.** The bot polls from ECS. Don't run `npm start` in
+  `apps/bot` locally, or register a webhook, with the same bot token: Telegram delivers updates one
+  way at a time and the second consumer silently steals them. `npm run delete-webhook` switches back.

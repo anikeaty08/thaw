@@ -74,6 +74,20 @@ A Credit Line whose health factor falls below 1.0 can be sent to auction by anyo
 4. On **Portfolio**, use the faucet to get test MUSD and a demo lock, then **Borrow** against it.
 5. Try **Lend**, repay part of your loan, and watch it all appear under **Recent**.
 
+## Try the Telegram bot
+
+Open the bot in Telegram and send these in order:
+
+| Send | You should get |
+|---|---|
+| `/start` | A welcome message listing the commands |
+| `/connect 0xYourWalletAddress` | "Linked … to this chat" (saved in the AWS database) |
+| `/loans` | Your open loans with what each still owes (from the indexer) |
+| `/quote <loanId>` | That loan's current debt and health factor (from the chain) |
+
+It also messages you on its own: an **epoch report every Thursday at 07:00 UTC** after the harvest,
+and a **warning every 15 minutes** if a linked loan's health gets close to liquidation.
+
 ## Live deployment
 
 | Piece         | Where |
@@ -81,6 +95,7 @@ A Credit Line whose health factor falls below 1.0 can be sent to auction by anyo
 | App           | AWS Amplify: <https://main.d3vf8kr22dusli.amplifyapp.com> |
 | Indexer API   | AWS ECS behind CloudFront: <https://dsiqcqjcx7f6.cloudfront.net/graphql> |
 | Keeper        | GitHub Actions: Thursday harvest, plus a 10-minute health sweep |
+| Telegram bot  | AWS ECS (`thaw-bot`): commands, epoch reports and health warnings |
 | Contracts     | Mezo testnet, addresses in [`deployments/mezo-testnet.json`](deployments/mezo-testnet.json) |
 
 Key contracts: LoanManager `0xfDd14a3be9A3D8ca2c9e24b7E41F8406EA5D3ac3` · tMUSD vault `0x59DFe06919e1d9D2F9d1d35D2Eb1d5E5d01785C8` · Harvester `0xcB506EE67dc7968507adcF69D84e1BA8Aadb64b8` · Liquidator `0xF7D8AF14Ff39Ae2e27C945327cb04Eb9Dbb99BA0`
