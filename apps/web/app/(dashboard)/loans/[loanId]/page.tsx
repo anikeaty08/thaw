@@ -18,13 +18,6 @@ import Link from "next/link";
 import { useReadContract } from "wagmi";
 import { projectPayoff } from "@/lib/projection";
 
-export function generateStaticParams() {
-  // Loan details are navigated client-side from the live indexer. An empty
-  // prerender set keeps the static dashboard export valid while preserving
-  // the dynamic route for server-capable hosts.
-  return [];
-}
-
 export default function LoanDetailPage() {
   const params = useParams<{ loanId: string }>();
   const loanId = BigInt(params.loanId);
