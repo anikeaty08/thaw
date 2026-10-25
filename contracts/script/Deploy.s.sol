@@ -116,9 +116,7 @@ contract Deploy is Script {
             IRouter.Route[] memory noFallback = new IRouter.Route[](0);
             oracleRouter.configureFeed(btcPriceToken, btcUsdFeed, 1 hours, 500, noFallback);
             VeBTCAdapter veBTCAdapter =
-                new VeBTCAdapter(
-                    deployer, veBTC, address(escrow), veBTCVoter, address(oracleRouter), btcPriceToken
-                );
+                new VeBTCAdapter(deployer, veBTC, address(escrow), veBTCVoter, address(oracleRouter), btcPriceToken);
             escrow.setAdapter(address(veBTCAdapter), true);
             escrow.setAllowedTarget(veBTCVoter, true);
             veBTCAdapter.setHarvester(address(harvester));
