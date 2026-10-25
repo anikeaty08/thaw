@@ -9,6 +9,8 @@ export const mezoTestnet = defineChain({
   nativeCurrency: { name: "Bitcoin", symbol: "BTC", decimals: 18 },
   rpcUrls: { default: { http: [config.rpcUrl] } },
   blockExplorers: { default: { name: "Mezo Explorer", url: "https://explorer.test.mezo.org" } },
+  // The canonical Multicall3 is deployed on Mezo testnet; viem needs it declared to batch reads.
+  contracts: { multicall3: { address: "0xcA11bde05977b3631167028862bE2a173976CA11" } },
 });
 
 export const account = privateKeyToAccount(config.keeperPrivateKey);
