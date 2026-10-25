@@ -18,5 +18,11 @@ cron.schedule("*/15 * * * *", () => {
   sendLiquidationWarnings().catch((err) => console.error("[bot] liquidation warning job crashed:", err));
 });
 
-bot.start();
-console.log("[bot] Thaw Telegram bot running in long-polling mode (local dev / self-host)");
+// Exit on a startup failure (bad token, another poller on the same token) so ECS restarts the task
+// and the failure shows up in the logs instead of leaving a bot that silently receives nothing.
+bot
+  .start({ onStart: (me) => console.log(`[bot] @${me.username} is polling for updates (long-polling mode)`) })
+  .catch((err) => {
+    console.error("[bot] polling stopped:", err);
+    process.exit(1);
+  });

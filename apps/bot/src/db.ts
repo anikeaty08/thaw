@@ -21,6 +21,10 @@ export function ensureSchema(): Promise<void> {
         linked_at timestamptz not null default now()
       )
     `.then(() => undefined);
+    // Don't cache a failure: the next call should try again instead of failing forever.
+    ensured.catch(() => {
+      ensured = null;
+    });
   }
   return ensured;
 }
