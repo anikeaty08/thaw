@@ -7,10 +7,20 @@ function required(name: string): string {
   return value;
 }
 
+/** Accepts a key with or without the 0x prefix (MetaMask exports it without), ignoring stray whitespace. */
+function privateKey(name: string): Hex {
+  const raw = required(name).trim();
+  const key = (raw.startsWith("0x") ? raw : `0x${raw}`) as Hex;
+  if (!/^0x[0-9a-fA-F]{64}$/.test(key)) {
+    throw new Error(`${name} must be a 32-byte hex private key (64 hex characters, 0x optional).`);
+  }
+  return key;
+}
+
 export const config = {
   rpcUrl: process.env.RPC_URL ?? "https://rpc.test.mezo.org",
   chainId: Number(process.env.CHAIN_ID ?? 31611),
-  keeperPrivateKey: required("KEEPER_PRIVATE_KEY") as Hex,
+  keeperPrivateKey: privateKey("KEEPER_PRIVATE_KEY"),
 
   harvesterAddress: required("HARVESTER_ADDRESS") as Address,
   loanManagerAddress: required("LOAN_MANAGER_ADDRESS") as Address,
