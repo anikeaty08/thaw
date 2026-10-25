@@ -32,5 +32,11 @@ export const config = {
   harvestCron: process.env.HARVEST_CRON ?? "5 0 * * 4", // Thu 00:05 UTC, §10.1
   healthCheckCron: process.env.HEALTH_CHECK_CRON ?? "*/10 * * * *", // §10.2
 
+  // Mezo's RPC can't be trusted to estimate gas (it returned ~21k for a harvest, which reverts), so
+  // every keeper transaction sets its limit explicitly. A harvest costs roughly this much per loan.
+  harvestGasBase: BigInt(process.env.HARVEST_GAS_BASE ?? 400_000),
+  harvestGasPerLoan: BigInt(process.env.HARVEST_GAS_PER_LOAN ?? 900_000),
+  auctionGas: BigInt(process.env.AUCTION_GAS ?? 1_500_000),
+
   minBountyToGasRatio: Number(process.env.MIN_BOUNTY_TO_GAS_RATIO ?? 1.2),
 };

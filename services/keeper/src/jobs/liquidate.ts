@@ -47,8 +47,9 @@ export async function runLiquidationSweep(): Promise<void> {
         args: [loanId],
         account,
       });
-      const hash = await walletClient.writeContract(request);
-      await publicClient.waitForTransactionReceipt({ hash });
+      const hash = await walletClient.writeContract({ ...request, gas: config.auctionGas });
+      const receipt = await publicClient.waitForTransactionReceipt({ hash });
+      if (receipt.status !== "success") throw new Error(`transaction ${hash} reverted`);
       console.log(`[liquidate] started auction for loan ${loanId}, tx ${hash}`);
     } catch (err) {
       // Likely already liquidating (another keeper won the race) or HF recovered between reads.

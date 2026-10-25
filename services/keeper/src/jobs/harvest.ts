@@ -13,6 +13,7 @@ function chunk<T>(arr: T[], size: number): T[][] {
 /// Thursday 00:00 UTC epoch flip: claim -> swap -> repay -> re-vote, batched through harvestMany
 /// so a single bad loan (a stuck adapter, a depegged reward token) can't block the rest.
 export async function runHarvestJob(): Promise<void> {
+  let failedBatches = 0;
   const loanIds = await fetchActiveLoanIds();
   if (loanIds.length === 0) {
     console.log("[harvest] no active loans, nothing to do");
@@ -31,16 +32,21 @@ export async function runHarvestJob(): Promise<void> {
         account,
       });
 
-      const hash = await walletClient.writeContract(request);
+      const gas = config.harvestGasBase + config.harvestGasPerLoan * BigInt(batch.length);
+      const hash = await walletClient.writeContract({ ...request, gas });
       const receipt = await publicClient.waitForTransactionReceipt({ hash });
+      if (receipt.status !== "success") throw new Error(`transaction ${hash} reverted`);
 
       console.log(
         `[harvest] batch of ${batch.length} -> ${result} succeeded, tx ${hash}, status ${receipt.status}, gasUsed ${receipt.gasUsed}`,
       );
     } catch (err) {
+      failedBatches++;
       console.error(`[harvest] batch failed (loanIds ${batch.join(",")}):`, err instanceof Error ? err.message : err);
     }
   }
+  // Fail the run so a scheduled job that harvested nothing shows up red instead of green.
+  if (failedBatches > 0) throw new Error(`${failedBatches} harvest batch(es) failed`);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
