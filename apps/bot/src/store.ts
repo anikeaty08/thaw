@@ -1,14 +1,28 @@
+import { randomInt } from "node:crypto";
 import type { Address } from "viem";
 import { sql, ensureSchema } from "./db.js";
 
-export async function linkWallet(chatId: number, address: Address): Promise<void> {
+// 32 symbols without the look-alikes I, O, 0 and 1. The indexer's CODE_PATTERN must match.
+const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const CODE_TTL_MINUTES = 10;
+
+/**
+ * A fresh one-time code for this chat, valid for ten minutes. The web app has the wallet sign a
+ * message containing it, and the indexer's /telegram/link endpoint checks the signature and spends
+ * the code. A chat only ever has one live code; asking again replaces it.
+ */
+export async function createLinkCode(chatId: number): Promise<string> {
   await ensureSchema();
+  const code = Array.from({ length: 8 }, () => CODE_ALPHABET[randomInt(CODE_ALPHABET.length)]).join("");
+  await sql`delete from bot_link_codes where chat_id = ${chatId} or expires_at < now()`;
   await sql`
-    insert into bot_links (chat_id, address)
-    values (${chatId}, ${address.toLowerCase()})
-    on conflict (chat_id) do update set address = excluded.address, linked_at = now()
+    insert into bot_link_codes (code, chat_id, expires_at)
+    values (${code}, ${chatId}, now() + ${CODE_TTL_MINUTES} * interval '1 minute')
   `;
+  return code;
 }
+
+export const LINK_CODE_TTL_MINUTES = CODE_TTL_MINUTES;
 
 export async function unlinkWallet(chatId: number): Promise<boolean> {
   await ensureSchema();

@@ -106,3 +106,4 @@ jobs:
           cache-dependency-path: indexer/package-lock.json
       - run: npm install
       - run: npm run typecheck
+      - run: npm test

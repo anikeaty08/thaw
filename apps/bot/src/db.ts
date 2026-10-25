@@ -20,7 +20,17 @@ export function ensureSchema(): Promise<void> {
         address text not null,
         linked_at timestamptz not null default now()
       )
-    `.then(() => undefined);
+    `
+      .then(
+        () => sql`
+          create table if not exists bot_link_codes (
+            code text primary key,
+            chat_id bigint not null,
+            expires_at timestamptz not null
+          )
+        `,
+      )
+      .then(() => undefined);
     // Don't cache a failure: the next call should try again instead of failing forever.
     ensured.catch(() => {
       ensured = null;

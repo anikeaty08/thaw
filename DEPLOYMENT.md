@@ -102,6 +102,10 @@ aws logs tail /ecs/thaw-bot --since 30m --region ap-southeast-2
 The log should show `[bot] @<username> is polling for updates`, then one `[bot] update from chat …`
 line per message people send.
 
+**Linking a wallet** needs the indexer's `POST /telegram/link` (it reads the same database as the bot).
+The app's `/link-telegram` page signs a message and posts it there; `NEXT_PUBLIC_INDEXER_URL` and the
+bot's `WEBAPP_URL` must point at the live indexer and app.
+
 **Only one poller per token.** Telegram hands each update to exactly one consumer. Do not run
 `npm start` locally, or a webhook, against the same bot token while the ECS task is running; they
 steal each other's updates. `npm run delete-webhook` clears a leftover webhook.

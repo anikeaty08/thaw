@@ -1,7 +1,7 @@
 import { Bot, InlineKeyboard } from "grammy";
 import { isAddress, formatUnits, type Address } from "viem";
 import { config } from "./config.js";
-import { linkWallet, getLinkedWallet, unlinkWallet } from "./store.js";
+import { createLinkCode, getLinkedWallet, unlinkWallet, LINK_CODE_TTL_MINUTES } from "./store.js";
 import { fetchLoansForBorrower } from "./graphql.js";
 import { readDebt, readHealthFactor } from "./chain.js";
 
@@ -10,28 +10,44 @@ function fmt(musd: bigint): string {
 }
 
 export function registerCommands(bot: Bot): void {
+  // Linking a wallet is verified: the chat gets a one-time code, and the wallet must sign a message
+  // containing it in the web app. Typing an address alone never links anything.
+  async function sendLinkCode(chatId: number, reply: (text: string, other?: object) => Promise<unknown>): Promise<void> {
+    const code = await createLinkCode(chatId);
+    const shown = `${code.slice(0, 4)}-${code.slice(4)}`;
+    const keyboard = new InlineKeyboard().url("Verify with your wallet", `${config.webappUrl}/link-telegram?code=${code}`);
+    await reply(
+      [
+        "To get alerts for your loans, prove this wallet is yours.",
+        "",
+        "1. Tap the button below (it opens the Thaw app).",
+        "2. Connect your wallet and sign the message. It's free: no transaction, no gas.",
+        "",
+        `Your code is ${shown}. It works once and expires in ${LINK_CODE_TTL_MINUTES} minutes.`,
+        "If the button doesn't open, enter the code on the app's Telegram page.",
+        "",
+        "Never share this code with anyone.",
+      ].join("\n"),
+      { reply_markup: keyboard },
+    );
+  }
+
   bot.command("start", async (ctx) => {
-    // The "Get alerts on Telegram" button in the app opens t.me/<bot>?start=<wallet address>, which
-    // arrives here as "/start 0x…". Link that address to this chat.
-    const payload = ctx.match?.toString().trim();
-    if (payload && isAddress(payload)) {
-      await linkWallet(ctx.chat.id, payload as Address);
-      return ctx.reply(
-        `You're set. This chat will get Thaw alerts for ${payload}:\n` +
-          "• a repayment report after each Thursday harvest\n" +
-          "• a warning if a loan's health gets close to liquidation\n\n" +
-          "Alerts only use public on-chain data. Not your wallet? Send /unlink.\n" +
-          "Try /loans to see your open loans.",
-      );
-    }
+    // "Get alerts on Telegram" in the app opens t.me/<bot>?start=link, which arrives as "/start link".
+    if (ctx.match?.toString().trim() === "link") return sendLinkCode(ctx.chat.id, (t, o) => ctx.reply(t, o));
     return ctx.reply(
-      "Welcome to Thaw. Borrow MUSD against your locked veMEZO/veBTC — your weekly Mezo Earn rewards pay it back.\n\n" +
-        "/connect <wallet address> - link your wallet\n" +
-        "/loans - list your active loans\n" +
-        "/quote <loanId> - current debt and health factor\n" +
-        "/unlink - stop alerts for this chat\n",
+      [
+        "Welcome to Thaw. Borrow MUSD against your locked veMEZO/veBTC — your weekly Mezo Earn rewards pay it back.",
+        "",
+        "/connect - link your wallet (verified with a free signature)",
+        "/loans - list your active loans",
+        "/quote <loanId> - current debt and health factor",
+        "/unlink - stop alerts for this chat",
+      ].join("\n"),
     );
   });
+
+  bot.command("connect", (ctx) => sendLinkCode(ctx.chat.id, (t, o) => ctx.reply(t, o)));
 
   bot.command("unlink", async (ctx) => {
     const removed = await unlinkWallet(ctx.chat.id);
@@ -40,20 +56,9 @@ export function registerCommands(bot: Bot): void {
     );
   });
 
-  bot.command("connect", async (ctx) => {
-    const arg = ctx.match?.toString().trim();
-    if (!arg || !isAddress(arg)) {
-      return ctx.reply("Usage: /connect 0xYourWalletAddress");
-    }
-    // Trust-on-first-use: this does not prove wallet ownership. Good enough for a hackathon demo;
-    // production should require a signed message (e.g. SIWE) before linking a chat to an address.
-    await linkWallet(ctx.chat.id, arg as Address);
-    await ctx.reply(`Linked ${arg} to this chat. Try /loans.`);
-  });
-
   bot.command("loans", async (ctx) => {
     const wallet = await getLinkedWallet(ctx.chat.id);
-    if (!wallet) return ctx.reply("No wallet linked yet. Run /connect <address> first.");
+    if (!wallet) return ctx.reply("No wallet linked yet. Send /connect to link one.");
 
     const loans = await fetchLoansForBorrower(wallet);
     if (loans.length === 0) return ctx.reply("No active loans for this wallet.");

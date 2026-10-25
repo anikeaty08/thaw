@@ -324,7 +324,8 @@ Harvest repayments and manual repayments emit the same `Repaid` event; the index
 
 ### 10.3 Optimizer and Telegram bot
 - **Optimizer:** greedy water-filling across live gauges by marginal incentive per vote; posts a strategy hash and weights each epoch.
-- **Telegram bot:** `/connect`, `/loans`, `/quote <tokenId>`, epoch reports and health warnings; reads the indexer and the chain.
+- **Telegram bot:** `/connect`, `/loans`, `/quote <loanId>`, `/unlink`, epoch reports and health warnings; reads the indexer and the chain.
+- **Verified linking:** `/connect` gives the chat a one-time code (8 characters, single use, 10 minutes, stored in `bot_link_codes`). The app's `/link-telegram` page has the wallet sign a message containing the code and the address, and posts it to the indexer's `POST /telegram/link`. The indexer checks the signature, spends the code and writes `bot_links` in one transaction, so the code proves who holds the chat and the signature proves who holds the wallet. The endpoint lives on the indexer because it is the public service that can reach the private database; it is rate limited per client.
 
 ---
 

@@ -76,17 +76,21 @@ A Credit Line whose health factor falls below 1.0 can be sent to auction by anyo
 
 ## Try the Telegram bot
 
-Easiest: in the app, tap **Get alerts on Telegram** (on Portfolio or Recent). It opens the bot already
-pointed at your connected wallet. Send `/unlink` to the bot any time to stop.
+Linking is verified, so nobody can attach a wallet they don't own to their chat:
 
-Or open **@thaww08_bot** and send these in order:
+1. Send `/connect` to **@thaww08_bot** (or tap **Get alerts on Telegram** in the app). The bot replies with a
+   one-time code and a button.
+2. Tap the button. It opens the app, where you sign a short message with your wallet. The signature is
+   free: no transaction, no gas.
+3. The chat is linked. Send `/unlink` any time to stop.
 
 | Send | You should get |
 |---|---|
 | `/start` | A welcome message listing the commands |
-| `/connect 0xYourWalletAddress` | "Linked … to this chat" (saved in the AWS database) |
+| `/connect` | A one-time code and a "Verify with your wallet" button |
 | `/loans` | Your open loans with what each still owes (from the indexer) |
 | `/quote <loanId>` | That loan's current debt and health factor (from the chain) |
+| `/unlink` | Stops alerts for this chat |
 
 It also messages you on its own: an **epoch report every Thursday at 07:00 UTC** after the harvest,
 and a **warning every 15 minutes** if a linked loan's health gets close to liquidation.
