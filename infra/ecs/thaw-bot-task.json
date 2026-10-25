@@ -1,0 +1,58 @@
+{
+  "family": "thaw-bot",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::406169239164:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "thaw-bot",
+      "image": "REPLACED_BY_DEPLOY_WORKFLOW",
+      "essential": true,
+      "environment": [
+        {
+          "name": "RPC_URL",
+          "value": "https://rpc.test.mezo.org"
+        },
+        {
+          "name": "CHAIN_ID",
+          "value": "31611"
+        },
+        {
+          "name": "LOAN_MANAGER_ADDRESS",
+          "value": "0xfDd14a3be9A3D8ca2c9e24b7E41F8406EA5D3ac3"
+        },
+        {
+          "name": "INDEXER_URL",
+          "value": "https://dsiqcqjcx7f6.cloudfront.net"
+        },
+        {
+          "name": "WEBAPP_URL",
+          "value": "https://main.d3vf8kr22dusli.amplifyapp.com"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "DATABASE_URL",
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-2:406169239164:secret:thaw/rds/database-Q341ej"
+        },
+        {
+          "name": "TELEGRAM_BOT_TOKEN",
+          "valueFrom": "thaw/bot/telegram-token"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/thaw-bot",
+          "awslogs-region": "ap-southeast-2",
+          "awslogs-stream-prefix": "ecs",
+          "awslogs-create-group": "true"
+        }
+      }
+    }
+  ]
+}

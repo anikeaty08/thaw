@@ -1,0 +1,78 @@
+name: Deploy Thaw Telegram bot
+
+# Runs the bot on ECS next to the indexer's private RDS database: it long-polls Telegram and runs
+# the epoch report and liquidation warnings on its own schedule (apps/bot/src/index.ts).
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/bot/**"
+      - "infra/ecs/thaw-bot-task.json"
+      - ".github/workflows/deploy-bot.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: thaw-bot-production
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: ap-southeast-2
+  CLUSTER: kishan-saathi-cluster
+  SERVICE: thaw-bot
+  TOKEN_SECRET: thaw/bot/telegram-token
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and publish the bot image
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          aws ecr describe-repositories --repository-names thaw-bot >/dev/null 2>&1 \
+            || aws ecr create-repository --repository-name thaw-bot >/dev/null
+          docker build -t "$REGISTRY/thaw-bot:$IMAGE_TAG" apps/bot
+          docker push "$REGISTRY/thaw-bot:$IMAGE_TAG"
+
+      - name: Register the task and roll out the service
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          jq --arg image "$REGISTRY/thaw-bot:$IMAGE_TAG" '.containerDefinitions[0].image = $image' \
+            infra/ecs/thaw-bot-task.json > task-definition.json
+          TASK_DEF_ARN=$(aws ecs register-task-definition --cli-input-json file://task-definition.json \
+            --query 'taskDefinition.taskDefinitionArn' --output text)
+          # Same subnets and security group as the indexer, which already reaches the database.
+          NETWORK=$(aws ecs describe-services --cluster "$CLUSTER" --services thaw-indexer \
+            --query 'services[0].networkConfiguration' --output json)
+          STATUS=$(aws ecs describe-services --cluster "$CLUSTER" --services "$SERVICE" \
+            --query 'services[0].status' --output text 2>/dev/null || echo MISSING)
+          if [ "$STATUS" = "ACTIVE" ]; then
+            aws ecs update-service --cluster "$CLUSTER" --service "$SERVICE" \
+              --task-definition "$TASK_DEF_ARN" --force-new-deployment \
+              --deployment-configuration "minimumHealthyPercent=0,maximumPercent=100" >/dev/null
+          else
+            # One poller per bot token: never run two tasks at once.
+            aws ecs create-service --cluster "$CLUSTER" --service-name "$SERVICE" \
+              --task-definition "$TASK_DEF_ARN" --desired-count 1 --launch-type FARGATE \
+              --network-configuration "$NETWORK" \
+              --deployment-configuration "minimumHealthyPercent=0,maximumPercent=100" >/dev/null
+          fi
+          aws ecs wait services-stable --cluster "$CLUSTER" --services "$SERVICE"
