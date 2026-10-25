@@ -171,20 +171,22 @@ export default function LoanDetailPage() {
       {!isConfigured && <NotConfiguredBanner />}
 
       <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <StatTile label="Still owed" value={formatMusd(debtValue)} unit="MUSD" tone="frost" />
+        <StatTile icon="snowflake" label="Still owed" value={formatMusd(debtValue)} unit="MUSD" tone="frost" />
         <StatTile
+          icon="shield"
           label="Health factor"
           hint="Below 1.00 the position enters a Dutch auction. Advance loans show ∞ until 8 epochs pass with no repayment."
           value={formatHealthFactor(hf.data as bigint | undefined)}
           tone="neutral"
         />
         <StatTile
+          icon="drop"
           label="Rewards to debt"
           hint="Share of each Thursday harvest applied to this loan. The rest is sent to you."
           value={loanData ? `${loanData.repayShareBps / 100}%` : "—"}
           tone="ember"
         />
-        <StatTile label="Fixed APR" value={loanData ? `${loanData.aprBps / 100}%` : "—"} tone="neutral" />
+        <StatTile icon="lock" label="Fixed APR" value={loanData ? `${loanData.aprBps / 100}%` : "—"} tone="neutral" />
       </div>
 
       <section className="frost-panel mt-8 px-4 py-5 sm:px-6 sm:py-6">

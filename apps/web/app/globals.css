@@ -154,6 +154,215 @@
   .tabular {
     font-variant-numeric: tabular-nums;
   }
+
+  /* Pointer-lit card (SpotlightCard). --mx/--my follow the cursor; --spot is the tone's channels. */
+  .spotlight-card {
+    @apply frost-panel transition-[border-color] duration-300 will-change-transform;
+    --spot: var(--frost-400);
+  }
+  .spotlight-card[data-tone="ember"] {
+    --spot: var(--ember-500);
+  }
+  .spotlight-card > * {
+    position: relative;
+    z-index: 1;
+  }
+  .spotlight-card::before,
+  .spotlight-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+  .spotlight-card::before {
+    background: radial-gradient(480px circle at var(--mx, 50%) var(--my, 0%), rgb(var(--spot) / 0.12), transparent 45%);
+  }
+  /* The rim: a 1px ring masked out of a brighter gradient. */
+  .spotlight-card::after {
+    padding: 1px;
+    background: radial-gradient(280px circle at var(--mx, 50%) var(--my, 0%), rgb(var(--spot) / 0.75), transparent 60%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+  .spotlight-card:hover::before,
+  .spotlight-card:hover::after,
+  .spotlight-card:focus-within::before,
+  .spotlight-card:focus-within::after {
+    opacity: 1;
+  }
+
+  /* Icon in a softly lit tile; used on feature cards. */
+  .icon-tile {
+    @apply flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border;
+    background: linear-gradient(150deg, rgb(var(--spot, var(--frost-400)) / 0.18), rgb(var(--spot, var(--frost-400)) / 0.04));
+    border-color: rgb(var(--spot, var(--frost-400)) / 0.3);
+    color: rgb(var(--spot, var(--frost-400)));
+  }
+
+  /* Nav link with an underline that grows from the left on hover. */
+  .nav-link {
+    @apply relative py-1 transition-colors hover:text-frostwhite;
+  }
+  .nav-link::after {
+    content: "";
+    @apply absolute inset-x-0 -bottom-0.5 h-px origin-left scale-x-0 bg-thaw-gradient transition-transform duration-300;
+  }
+  .nav-link:hover::after,
+  .nav-link:focus-visible::after {
+    @apply scale-x-100;
+  }
+
+  .footer-link {
+    @apply inline-flex min-h-[28px] items-center gap-2 text-sm transition-colors hover:text-frostwhite;
+  }
+
+  /* Footer: navy that warms very slightly toward the bottom, with a faint glow under the corners. */
+  .footer-surface {
+    position: relative;
+    background:
+      radial-gradient(60% 80% at 0% 100%, rgb(var(--frost-500) / 0.1), transparent 70%),
+      radial-gradient(50% 70% at 100% 100%, rgb(var(--ember-500) / 0.08), transparent 70%),
+      rgb(var(--glacier-900));
+  }
+
+  /* Long-form docs copy. */
+  .docs-prose p,
+  .docs-prose ul,
+  .docs-prose ol {
+    @apply mt-4 leading-7 text-mist-300;
+  }
+  .docs-prose ul {
+    @apply list-disc space-y-2 pl-5 marker:text-frost-400;
+  }
+  .docs-prose ol {
+    @apply list-decimal space-y-2 pl-5 marker:font-mono marker:text-sm marker:text-mist-500;
+  }
+  .docs-prose strong {
+    @apply font-semibold text-frostwhite;
+  }
+  .docs-prose a {
+    @apply font-medium text-frost-300 underline decoration-frost-400/40 underline-offset-4 hover:decoration-frost-300;
+  }
+  .docs-prose code {
+    @apply rounded-md border border-glacier-700 bg-glacier-900 px-1.5 py-0.5 font-mono text-[0.85em] text-frost-200;
+  }
+
+  /* Gradient-filled text in the brand's frost-to-ember sweep. */
+  .text-thaw {
+    @apply bg-thaw-gradient bg-clip-text text-transparent;
+  }
+}
+
+/* Six dots in a 3×2 grid (SiteMenu trigger); on hover the rows shuffle past each other. */
+.menu-dots {
+  display: grid;
+  grid-template-columns: repeat(3, 4px);
+  gap: 3px;
+}
+.menu-dots i {
+  width: 4px;
+  height: 4px;
+  border-radius: 9999px;
+  background: currentColor;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.35s;
+}
+.roll-host:hover .menu-dots i:nth-child(odd) {
+  transform: translateY(2px);
+}
+.roll-host:hover .menu-dots i:nth-child(even) {
+  transform: translateY(-2px);
+  background: rgb(var(--ember-400));
+}
+/* While the panel is open the dots stay shuffled and warm: same spot, now it closes. */
+.menu-dots.is-open i:nth-child(odd) {
+  transform: translateY(2px);
+}
+.menu-dots.is-open i:nth-child(even) {
+  transform: translateY(-2px);
+  background: rgb(var(--ember-400));
+}
+
+/* Full-screen menu panel; the <dialog> itself is the panel. */
+.site-menu {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow-y: auto;
+  background: rgb(var(--glacier-950));
+  color: rgb(var(--ink));
+}
+.site-menu::backdrop {
+  background: transparent;
+}
+
+/* Typewriter caret (TypeWords): a thin ember bar that blinks between keystrokes. */
+.type-caret {
+  display: inline-block;
+  width: 0.06em;
+  height: 0.82em;
+  margin-left: 0.06em;
+  vertical-align: -0.04em;
+  border-radius: 2px;
+  background: rgb(var(--ember-400));
+  animation: caret-blink 1s steps(1) infinite;
+}
+@keyframes caret-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* RollText: each letter is a one-line window over a two-row column that slides up on hover. */
+.roll-char {
+  display: inline-block;
+  height: 1lh;
+  overflow: hidden;
+  vertical-align: top;
+}
+.roll-col {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.roll-host:hover .roll-col,
+.roll-host:focus-visible .roll-col {
+  transform: translateY(-50%);
+}
+
+/* Motion bootstrapping (see motionInitScript). The hero waits hidden for GSAP to reveal it, and the
+   intro curtain only exists while it plays. Both carry a timed fallback in case scripts never run. */
+.motion-ok [data-reveal] {
+  visibility: hidden;
+  animation: motion-fallback 0s 3.5s forwards;
+}
+.intro-curtain {
+  display: none;
+}
+[data-intro="play"] .intro-curtain,
+[data-intro="lifting"] .intro-curtain {
+  display: flex;
+  animation: intro-fallback 0.5s 4s forwards;
+}
+@keyframes motion-fallback {
+  to {
+    visibility: visible;
+  }
+}
+@keyframes intro-fallback {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
 }
 
 /* Recharts draws with SVG presentation attributes; CSS wins over those, so theme them here.

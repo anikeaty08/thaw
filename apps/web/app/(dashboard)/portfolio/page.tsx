@@ -39,7 +39,7 @@ export default function PortfolioPage() {
 
   return (
     <div className="mx-auto max-w-5xl">
-      <PageHeader title="Portfolio" description="Your open loans, and any veMEZO or veBTC lock you want to borrow against." />
+      <PageHeader eyebrow="Borrow" title="Portfolio" description="Your open loans, and any veMEZO or veBTC lock you want to borrow against." />
 
       {!isConfigured && <NotConfiguredBanner />}
 
@@ -52,9 +52,9 @@ export default function PortfolioPage() {
       ) : (
         <>
           <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
-            <StatTile label="Owed across loans" value={formatMusd(outstanding)} unit="MUSD" tone="frost" />
-            <StatTile label="Paid by rewards so far" value={formatMusd(repaid)} unit="MUSD" tone="ember" />
-            <StatTile label="Open loans" value={loans.status === "loading" ? "…" : openLoans.length} tone="neutral" className="col-span-2 lg:col-span-1" />
+            <StatTile icon="snowflake" label="Owed across loans" value={formatMusd(outstanding)} unit="MUSD" tone="frost" />
+            <StatTile icon="drop" label="Paid by rewards so far" value={formatMusd(repaid)} unit="MUSD" tone="ember" />
+            <StatTile icon="wallet" label="Open loans" value={loans.status === "loading" ? "…" : openLoans.length} tone="neutral" className="col-span-2 lg:col-span-1" />
           </div>
 
           <section className="mt-10" aria-labelledby="open-loans">

@@ -1,6 +1,9 @@
 import type { ReactNode } from "react";
 import clsx from "clsx";
 import { Tooltip } from "./Tooltip";
+import { Icon, type IconName } from "./Icon";
+import { SpotlightCard } from "./SpotlightCard";
+import { ScrambleText } from "@/components/motion/ScrambleText";
 
 export function StatTile({
   label,
@@ -8,6 +11,7 @@ export function StatTile({
   unit,
   hint,
   tone = "frost",
+  icon,
   className,
 }: {
   label: string;
@@ -15,11 +19,13 @@ export function StatTile({
   unit?: string;
   hint?: string;
   tone?: "frost" | "ember" | "neutral";
+  icon?: IconName;
   className?: string;
 }) {
   return (
-    <div className={clsx("frost-panel min-w-0 px-4 py-4 sm:px-5", className)}>
+    <SpotlightCard tone={tone === "ember" ? "ember" : "frost"} tilt={false} className={clsx("min-w-0 px-4 py-4 sm:px-5", className)}>
       <div className="flex items-center gap-1.5 text-[13px] text-mist-400">
+        {icon && <Icon name={icon} size={15} className={tone === "ember" ? "text-ember-400" : "text-frost-300"} />}
         <span className="truncate">{label}</span>
         {hint && <Tooltip content={hint} label={`About ${label.toLowerCase()}`} />}
       </div>
@@ -31,10 +37,10 @@ export function StatTile({
             tone === "ember" && "text-ember-400",
             tone === "neutral" && "text-frostwhite",
           )}>
-          {value}
+          {typeof value === "string" ? <ScrambleText text={value} duration={0.7} /> : value}
         </span>
         {unit && <span className="text-xs text-mist-500">{unit}</span>}
       </div>
-    </div>
+    </SpotlightCard>
   );
 }

@@ -24,7 +24,11 @@ export type IconName =
   | "calendar"
   | "copy"
   | "sun"
-  | "moon";
+  | "moon"
+  | "flash"
+  | "chart"
+  | "github"
+  | "document";
 
 export function Icon({
   name,

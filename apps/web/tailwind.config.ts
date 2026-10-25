@@ -33,16 +33,6 @@ const config: Config = {
         glow: "0 8px 30px -8px rgba(8,124,255,0.55)",
       },
       keyframes: {
-        // The headline arrives frosted over and comes into focus: the thaw.
-        thaw: {
-          "0%": { filter: "blur(12px)", opacity: "0", letterSpacing: "0.01em", color: "rgb(var(--frost-200))" },
-          "50%": { filter: "blur(1px)", opacity: "1" },
-          "100%": { filter: "blur(0)", opacity: "1", letterSpacing: "-0.05em", color: "rgb(var(--ink))" },
-        },
-        "rise-in": {
-          "0%": { opacity: "0", transform: "translateY(10px)" },
-          "100%": { opacity: "1", transform: "translateY(0)" },
-        },
         drip: {
           "0%": { transform: "translateY(0)", opacity: "0" },
           "15%": { opacity: "1" },
@@ -50,8 +40,6 @@ const config: Config = {
         },
       },
       animation: {
-        thaw: "thaw 1.4s cubic-bezier(0.16,1,0.3,1) both",
-        "rise-in": "rise-in 0.6s cubic-bezier(0.16,1,0.3,1) both",
         drip: "drip 1.4s cubic-bezier(0.55,0,1,0.45) infinite",
       },
     },

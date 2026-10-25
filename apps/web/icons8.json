@@ -94,6 +94,22 @@
       "moon": {
         "id": "xlD3xOrQjTJO",
         "commonName": "crescent-moon"
+      },
+      "flash": {
+        "id": "mo0QZAFTfTlF",
+        "commonName": "quick-mode-on"
+      },
+      "chart": {
+        "id": "ae1tFYleyxTq",
+        "commonName": "line-chart"
+      },
+      "github": {
+        "id": "zuHqpgzrusU5",
+        "commonName": "github"
+      },
+      "document": {
+        "id": "21DAyRc11VTK",
+        "commonName": "document--v2"
       }
     }
   }

@@ -109,6 +109,7 @@ export default function LendPage() {
   return (
     <div className="mx-auto max-w-5xl">
       <PageHeader
+        eyebrow="tMUSD vault"
         title="Lend"
         description="Deposit MUSD into the tMUSD vault. It's lent to borrowers whose locks repay them every Thursday."
       />
@@ -116,14 +117,16 @@ export default function LendPage() {
       {!isConfigured && <NotConfiguredBanner />}
 
       <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <StatTile label="Vault deposits" value={formatMusd(totalAssets, { compact: true })} unit="MUSD" />
+        <StatTile icon="coins" label="Vault deposits" value={formatMusd(totalAssets, { compact: true })} unit="MUSD" />
         <StatTile
+          icon="chart"
           label="Utilization"
           value={utilization !== undefined ? `${utilization.toFixed(0)}%` : "—"}
           hint="Share of deposits currently lent out to open loans."
           tone="ember"
         />
         <StatTile
+          icon="flash"
           label="Available now"
           value={formatMusd(idle, { compact: true })}
           unit="MUSD"
@@ -131,6 +134,7 @@ export default function LendPage() {
           hint="Idle MUSD you can withdraw instantly. It earns the MUSD Savings Rate while it waits."
         />
         <StatTile
+          icon="shield"
           label="Bad debt to date"
           value={formatMusd(badDebt, { compact: true })}
           unit="MUSD"

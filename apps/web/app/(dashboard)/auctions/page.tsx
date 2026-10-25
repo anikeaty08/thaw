@@ -24,6 +24,7 @@ export default function AuctionsPage() {
   return (
     <div className="mx-auto max-w-5xl">
       <PageHeader
+        eyebrow="Liquidations"
         title="Auctions"
         description="When a Credit Line falls below a health factor of 1, its lock is sold here. The price starts near market value and drops for 24 hours to a floor. Anyone can buy."
       />

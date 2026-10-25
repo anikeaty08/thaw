@@ -3,6 +3,10 @@ import path from "node:path";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // Protocol transparency now lives in the public docs.
+  async redirects() {
+    return [{ source: "/transparency", destination: "/docs#live", permanent: true }];
+  },
   // A stray lockfile in the user's home directory confuses Next's workspace-root detection.
   outputFileTracingRoot: path.join(import.meta.dirname),
   webpack: (config, { webpack }) => {

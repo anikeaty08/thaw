@@ -7,7 +7,6 @@ import { fetchVaultFlows, type VaultFlowRow } from "@/lib/graphql";
 import { useAsync } from "@/lib/useAsync";
 import { formatMusd, formatDate } from "@/lib/format";
 import { StatTile } from "@/components/ui/StatTile";
-import { PageHeader } from "@/components/ui/PageHeader";
 import { AddressChip } from "@/components/ui/AddressChip";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { Tooltip } from "@/components/ui/Tooltip";
@@ -25,7 +24,8 @@ const CONTRACTS: { name: string; role: string; address: string | undefined }[] =
   { name: "Demo veNFT", role: "Mock lock used for testnet loans", address: addresses.mockVe },
 ];
 
-export default function TransparencyPage() {
+/** Live protocol state for the docs: vault totals, risk parameters, recent flows and contracts. */
+export function LiveProtocol() {
   const vault = useVaultOverview();
   const flows = useAsync<VaultFlowRow[]>(isConfigured ? () => fetchVaultFlows(20) : null, [], []);
 
@@ -45,12 +45,10 @@ export default function TransparencyPage() {
     | undefined;
 
   return (
-    <div className="mx-auto max-w-5xl">
-      <PageHeader title="Transparency" description="Every risk parameter, every vault movement and every contract, read live from the chain." />
-
+    <div>
       {!isConfigured && <NotConfiguredBanner />}
 
-      <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
+      <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
         <StatTile label="Vault deposits" value={formatMusd(totalAssets, { compact: true })} unit="MUSD" />
         <StatTile label="Lent to borrowers" value={formatMusd(totalLent, { compact: true })} unit="MUSD" tone="ember" />
         <StatTile

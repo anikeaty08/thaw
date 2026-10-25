@@ -1,5 +1,10 @@
 import { AppShell } from "@/components/layout/AppShell";
+import { WalletGate } from "@/components/layout/WalletGate";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  return <AppShell>{children}</AppShell>;
+  return (
+    <WalletGate>
+      <AppShell>{children}</AppShell>
+    </WalletGate>
+  );
 }

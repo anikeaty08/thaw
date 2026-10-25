@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Web3Provider } from "@/components/providers/Web3Provider";
 import { ThemeProvider, themeInitScript } from "@/components/providers/ThemeProvider";
+import { motionInitScript } from "@/lib/motionInit";
 import "./globals.css";
 
 const body = Geist({
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" data-theme="dark" className={`${body.variable} ${mono.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <script dangerouslySetInnerHTML={{ __html: motionInitScript }} />
       </head>
       <body className="font-body">
         <ThemeProvider>
