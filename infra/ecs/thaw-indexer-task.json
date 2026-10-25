@@ -1,0 +1,25 @@
+{
+  "family": "thaw-indexer",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "arn:aws:iam::406169239164:role/ecsTaskExecutionRole",
+  "containerDefinitions": [{
+    "name": "thaw-indexer",
+    "image": "406169239164.dkr.ecr.ap-southeast-2.amazonaws.com/thaw-indexer:latest",
+    "essential": true,
+    "portMappings": [{"containerPort": 42069, "protocol": "tcp"}],
+    "environment": [
+      {"name":"PONDER_RPC_URL_MEZO_TESTNET","value":"https://rpc.test.mezo.org"},
+      {"name":"START_BLOCK","value":"16356305"},
+      {"name":"LOAN_MANAGER_ADDRESS","value":"0xfDd14a3be9A3D8ca2c9e24b7E41F8406EA5D3ac3"},
+      {"name":"HARVESTER_ADDRESS","value":"0xcB506EE67dc7968507adcF69D84e1BA8Aadb64b8"},
+      {"name":"TMUSD_VAULT_ADDRESS","value":"0x59DFe06919e1d9D2F9d1d35D2Eb1d5E5d01785C8"},
+      {"name":"DUTCH_AUCTION_LIQUIDATOR_ADDRESS","value":"0xF7D8AF14Ff39Ae2e27C945327cb04Eb9Dbb99BA0"},
+      {"name":"STRATEGY_REGISTRY_ADDRESS","value":"0xd3cF48Cd528dE8937d510F7c0cB4a675c8d06F49"}
+    ],
+    "secrets": [{"name":"DATABASE_URL","valueFrom":"arn:aws:secretsmanager:ap-southeast-2:406169239164:secret:thaw/rds/database-Q341ej"}],
+    "logConfiguration":{"logDriver":"awslogs","options":{"awslogs-group":"/ecs/thaw-indexer","awslogs-region":"ap-southeast-2","awslogs-stream-prefix":"ecs","awslogs-create-group":"true"}}
+  }]
+}

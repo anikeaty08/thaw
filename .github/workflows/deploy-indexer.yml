@@ -1,0 +1,56 @@
+name: Deploy Thaw indexer
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "indexer/**"
+      - "infra/ecs/**"
+      - ".github/workflows/deploy-indexer.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: thaw-indexer-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-southeast-2
+
+      - id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and publish indexer
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t "$REGISTRY/thaw-indexer:$IMAGE_TAG" indexer
+          docker push "$REGISTRY/thaw-indexer:$IMAGE_TAG"
+
+      - name: Register and roll out ECS task
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          jq --arg image "$REGISTRY/thaw-indexer:$IMAGE_TAG" \
+            '.containerDefinitions[0].image = $image' \
+            infra/ecs/thaw-indexer-task.json > task-definition.json
+          TASK_DEF_ARN=$(aws ecs register-task-definition \
+            --cli-input-json file://task-definition.json \
+            --query 'taskDefinition.taskDefinitionArn' --output text)
+          aws ecs update-service --cluster kishan-saathi-cluster --service thaw-indexer \
+            --task-definition "$TASK_DEF_ARN" --force-new-deployment
+          aws ecs wait services-stable --cluster kishan-saathi-cluster --services thaw-indexer
