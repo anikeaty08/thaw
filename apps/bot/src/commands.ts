@@ -1,7 +1,7 @@
 import { Bot, InlineKeyboard } from "grammy";
 import { isAddress, formatUnits, type Address } from "viem";
 import { config } from "./config.js";
-import { linkWallet, getLinkedWallet } from "./store.js";
+import { linkWallet, getLinkedWallet, unlinkWallet } from "./store.js";
 import { fetchLoansForBorrower } from "./graphql.js";
 import { readDebt, readHealthFactor } from "./chain.js";
 
@@ -10,14 +10,35 @@ function fmt(musd: bigint): string {
 }
 
 export function registerCommands(bot: Bot): void {
-  bot.command("start", (ctx) =>
-    ctx.reply(
+  bot.command("start", async (ctx) => {
+    // The "Get alerts on Telegram" button in the app opens t.me/<bot>?start=<wallet address>, which
+    // arrives here as "/start 0x…". Link that address to this chat.
+    const payload = ctx.match?.toString().trim();
+    if (payload && isAddress(payload)) {
+      await linkWallet(ctx.chat.id, payload as Address);
+      return ctx.reply(
+        `You're set. This chat will get Thaw alerts for ${payload}:\n` +
+          "• a repayment report after each Thursday harvest\n" +
+          "• a warning if a loan's health gets close to liquidation\n\n" +
+          "Alerts only use public on-chain data. Not your wallet? Send /unlink.\n" +
+          "Try /loans to see your open loans.",
+      );
+    }
+    return ctx.reply(
       "Welcome to Thaw. Borrow MUSD against your locked veMEZO/veBTC — your weekly Mezo Earn rewards pay it back.\n\n" +
         "/connect <wallet address> - link your wallet\n" +
         "/loans - list your active loans\n" +
-        "/quote <loanId> - current debt and health factor\n",
-    ),
-  );
+        "/quote <loanId> - current debt and health factor\n" +
+        "/unlink - stop alerts for this chat\n",
+    );
+  });
+
+  bot.command("unlink", async (ctx) => {
+    const removed = await unlinkWallet(ctx.chat.id);
+    await ctx.reply(
+      removed ? "Unlinked. You won't get alerts here any more. Use /connect to link again." : "No wallet was linked to this chat.",
+    );
+  });
 
   bot.command("connect", async (ctx) => {
     const arg = ctx.match?.toString().trim();

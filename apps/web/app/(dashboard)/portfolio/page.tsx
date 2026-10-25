@@ -18,6 +18,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { StatTile } from "@/components/ui/StatTile";
 import { IndexerError, SkeletonRows } from "@/components/ui/IndexerError";
 import { NotConfiguredBanner } from "@/components/ui/NotConfiguredBanner";
+import { TelegramAlerts } from "@/components/ui/TelegramAlerts";
 import { BorrowDrawer } from "@/components/borrow/BorrowDrawer";
 
 export default function PortfolioPage() {
@@ -42,6 +43,8 @@ export default function PortfolioPage() {
       <PageHeader eyebrow="Borrow" title="Portfolio" description="Your open loans, and any veMEZO or veBTC lock you want to borrow against." />
 
       {!isConfigured && <NotConfiguredBanner />}
+
+      <TelegramAlerts />
 
       {!isConnected ? (
         <div className="mt-8">

@@ -110,6 +110,10 @@
       "document": {
         "id": "21DAyRc11VTK",
         "commonName": "document--v2"
+      },
+      "telegram": {
+        "id": "8Rwkk7zgV076",
+        "commonName": "telegram-app"
       }
     }
   }

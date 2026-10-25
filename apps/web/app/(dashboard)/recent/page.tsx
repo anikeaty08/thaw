@@ -11,6 +11,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { IndexerError, SkeletonRows } from "@/components/ui/IndexerError";
 import { NotConfiguredBanner } from "@/components/ui/NotConfiguredBanner";
+import { TelegramAlerts } from "@/components/ui/TelegramAlerts";
 import { isConfigured } from "@/lib/hooks";
 import { fetchActivity, type ActivityRow } from "@/lib/graphql";
 import { useAsync } from "@/lib/useAsync";
@@ -84,6 +85,8 @@ export default function RecentPage() {
       <PageHeader eyebrow="Your wallet" title="Recent" description="Everything you've done on Thaw, and everything the Thursday harvest did for your loans." />
 
       {!isConfigured && <NotConfiguredBanner />}
+
+      <TelegramAlerts />
 
       {activity.status === "success" && activity.data.length > 0 && (
         <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">

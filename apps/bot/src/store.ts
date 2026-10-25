@@ -10,6 +10,12 @@ export async function linkWallet(chatId: number, address: Address): Promise<void
   `;
 }
 
+export async function unlinkWallet(chatId: number): Promise<boolean> {
+  await ensureSchema();
+  const rows = await sql`delete from bot_links where chat_id = ${chatId} returning chat_id`;
+  return rows.length > 0;
+}
+
 export async function getLinkedWallet(chatId: number): Promise<Address | undefined> {
   await ensureSchema();
   const rows = await sql<{ address: string }[]>`select address from bot_links where chat_id = ${chatId}`;

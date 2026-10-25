@@ -76,7 +76,10 @@ A Credit Line whose health factor falls below 1.0 can be sent to auction by anyo
 
 ## Try the Telegram bot
 
-Open the bot in Telegram and send these in order:
+Easiest: in the app, tap **Get alerts on Telegram** (on Portfolio or Recent). It opens the bot already
+pointed at your connected wallet. Send `/unlink` to the bot any time to stop.
+
+Or open **@thaww08_bot** and send these in order:
 
 | Send | You should get |
 |---|---|

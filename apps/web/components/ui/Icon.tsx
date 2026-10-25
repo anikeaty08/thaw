@@ -28,7 +28,8 @@ export type IconName =
   | "flash"
   | "chart"
   | "github"
-  | "document";
+  | "document"
+  | "telegram";
 
 export function Icon({
   name,
