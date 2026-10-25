@@ -2,7 +2,6 @@ import type { NextConfig } from "next";
 import path from "node:path";
 
 const nextConfig: NextConfig = {
-  output: "export",
   reactStrictMode: true,
   // A stray lockfile in the user's home directory confuses Next's workspace-root detection.
   outputFileTracingRoot: path.join(import.meta.dirname),
