@@ -114,6 +114,25 @@ check every 10 minutes.
 Both `keeper.yml` and `bot-notify.yml` also have a manual **Run workflow** button (Actions tab) for
 testing without waiting for the schedule.
 
+## 7. Verify the live stack
+
+After Render and Vercel have deployed, run this from the repository root. It checks every public
+frontend route, indexer health and readiness, the GraphQL response shape, and that each supplied
+contract address has bytecode on Mezo Testnet:
+
+```bash
+THAW_WEB_URL=https://<web-project>.vercel.app \
+THAW_INDEXER_URL=https://<indexer>.onrender.com \
+THAW_CONTRACT_LOAN_MANAGER=0x... \
+THAW_CONTRACT_ESCROW=0x... \
+THAW_CONTRACT_HARVESTER=0x... \
+npm run verify:live
+```
+
+Then connect a fresh testnet wallet and perform the user transaction flow: faucet drip, approve the
+demo lock, open a loan, make a repayment, and confirm the resulting event and loan data appear in
+the UI through the deployed indexer.
+
 ## Caveats worth knowing
 
 - **GitHub Actions cron is best-effort.** A scheduled run can slip a few minutes under GitHub's

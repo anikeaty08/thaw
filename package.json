@@ -12,6 +12,7 @@
   "scripts": {
     "contracts:build": "cd contracts && forge build",
     "contracts:test": "cd contracts && forge test",
-    "typecheck": "npm run typecheck --workspaces --if-present"
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "verify:live": "node scripts/verify-live.mjs"
   }
 }
